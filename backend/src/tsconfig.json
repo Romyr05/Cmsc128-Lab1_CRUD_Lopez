@@ -3,14 +3,13 @@
     
   "compilerOptions": {
     /* Language and Environment */
-    "target": "ES2022",                          /* Specify ECMAScript target version */
-    "lib": ["ES2022"],                           /* Specify library files to be included in the compilation */
+    "target": "ES2022",                          
+    "lib": ["ES2022"],                           
 
     /* Modules */
-    "module": "NodeNext",                        /* Specify module code generation */
-    "moduleResolution": "NodeNext",              /* Determine how modules get resolved */
-    "rootDir": "./src",                          /* Specify the root folder of input files */
-
+    "module": "NodeNext",                        
+    "moduleResolution": "NodeNext",              
+    "rootDir": "./src",                          
     /* JavaScript Support */
     "allowJs": false,                            /* Disallow JavaScript files to be compiled */
 
