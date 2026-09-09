@@ -117,3 +117,12 @@ frontend/src/
   types/                     shared TypeScript types
   lib/                       helpers (dates, tags, priority)
 ```
+
+
+## Screenshots
+
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
