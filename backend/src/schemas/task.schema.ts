@@ -8,11 +8,20 @@ export enum Priority_Enum{
   HIGH = 'high',
 }
 
+export enum Tag_Enum{
+  CURRICULAR = 'curricular',
+  EXTRA_CURRICULAR = 'extra-curricular',
+  HOME = 'home',
+}
+
 export interface interTask extends Document{
     title: string,
     completed: boolean,
     due_date?: Date,   // May have no deadline
-    priority: Priority_Enum
+    priority: Priority_Enum,
+    tag?: Tag_Enum,   // One optional tag
+    description?: string, // Optional Description
+    deletedAt?: Date | null,  // null/absent = active; a date = soft-deleted
 }
 
 export const taskSchema = new Schema<interTask>({
@@ -34,5 +43,16 @@ export const taskSchema = new Schema<interTask>({
         default: Priority_Enum.MEDIUM,
         required: true,
     },
-    
+    tag: {
+        type: String,
+        enum: Object.values(Tag_Enum),
+    },
+    description: {
+        type: String,
+    },
+    deletedAt: {
+        type: Date,
+        default: null,
+    },
+
 }, {timestamps: true})

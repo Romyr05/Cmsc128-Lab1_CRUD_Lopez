@@ -1,13 +1,14 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import './App.css'
+import TasksPage from './pages/TasksPage'
+import { Toaster } from '@/components/ui/sonner'
 
 function App() {
 
   return (
-    <></>
+    <>
+      <TasksPage/>
+      <Toaster duration={2000} />
+    </>
   )
 }
 
