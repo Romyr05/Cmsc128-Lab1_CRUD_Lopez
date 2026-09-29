@@ -6,7 +6,7 @@ export const TAG_OPTIONS: { value: Tag; label: string }[] = [
   { value: "home", label: "Home" },
 ];
 
-// derived from TAG_OPTIONS so that we do not call this over and over
+// derived from TAG_OPTIONS for faster lookup since i made the values into lowercase for Convention PUrposes
 export const tagLabel = Object.fromEntries(
   TAG_OPTIONS.map((o) => [o.value, o.label]),
 ) as Record<Tag, string>;

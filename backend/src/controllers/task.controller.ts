@@ -1,3 +1,5 @@
+// This is used for the business logic, validation and status error for those 
+
 import { Request, Response } from "express";
 import Task from "../models/Task.js";
 
@@ -43,7 +45,7 @@ export async function updateTask(req: Request, res:Response): Promise<void> {
     try {
         const tasks = await Task.findByIdAndUpdate(req.params.id, req.body, {
             //Options
-            new: true,
+            new: true, 
             runValidators: true
         })
         if(!tasks){
@@ -76,7 +78,7 @@ export async function deleteTask(req: Request, res: Response): Promise<void> {
     }
 }
 
-// Undo a soft delete: clear the flag
+// Undo a soft delete
 export async function restoreTask(req: Request, res: Response): Promise<void> {
     try {
         const task = await Task.findByIdAndUpdate(

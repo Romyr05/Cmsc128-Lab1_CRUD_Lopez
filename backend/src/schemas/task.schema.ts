@@ -14,6 +14,7 @@ export enum Tag_Enum{
   HOME = 'home',
 }
 
+// Needs to be Document for those _id
 export interface interTask extends Document{
     title: string,
     completed: boolean,
@@ -55,4 +56,4 @@ export const taskSchema = new Schema<interTask>({
         default: null,
     },
 
-}, {timestamps: true})
+}, {timestamps: true})  

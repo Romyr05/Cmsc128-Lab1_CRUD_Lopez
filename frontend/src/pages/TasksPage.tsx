@@ -143,6 +143,7 @@ function TasksPage() {
   };
 
   // apply filters, then sort all on the already-loaded list
+  // THESE ARE ALL TASKS SO . WORKS (TYPE)
   const visible = [...tasks]
     .filter((t) => (filterTag === "all" ? true : t.tag === filterTag))
     .filter((t) => (filterPriority === "all" ? true : t.priority === filterPriority))
@@ -151,8 +152,8 @@ function TasksPage() {
         case "due":
           // soonest first; tasks with no due date sink to the bottom
           if (!a.due_date) return 1;
-          if (!b.due_date) return -1;
-          return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+          if (!b.due_date) return -1; // if b has no date still a stays up
+          return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();   
         case "priority":     
           return priorityRank[a.priority] - priorityRank[b.priority]; 
         case "tag":
