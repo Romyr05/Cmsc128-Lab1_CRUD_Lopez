@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useForm } from "@tanstack/react-form";
 import { Flag, Plus, Trash2 } from "lucide-react";
 import type { task, Priority, Tag } from "@/types/task";
 import {
@@ -35,10 +36,10 @@ import { DateTimePicker } from "@/components/DateTimePicker";
 import { TaskCard } from "@/components/TaskCard";
 import { PRIORITY_ORDER, priorityColor } from "@/lib/priority";
 import { useTasks } from "@/hooks/useTasks";
-import type { FormState } from "@/types/addEditForm";
+import { taskFormSchema, toPayload, type TaskFormValues } from "@/lib/taskForm";
 
 
-const emptyForm: FormState = {
+const emptyForm: TaskFormValues = {
   title: "",
   description: "",
   due_date: "",
@@ -49,54 +50,18 @@ const emptyForm: FormState = {
 
 function TasksPage() {
   //on hooks
-  const { tasks, addTask, saveTask, removeTask, undoDelete, toggleCompleted } =
+  const { tasks, isLoading, isError, addTask, saveTask, removeTask, undoDelete, toggleCompleted } =
     useTasks();
 
-  //editor 
+  //editor
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null); // null = adding
-  const [form, setForm] = useState<FormState>(emptyForm);
-  const [saving, setSaving] = useState(false); // blocks double-submit
 
-  // Sorting and Filter
-  const [sortBy, setSortBy] = useState<"added" | "due" | "priority" | "tag">("added");
-  const [filterTag, setFilterTag] = useState<Tag | "all">("all");
-  const [filterPriority, setFilterPriority] = useState<Priority | "all">("all");
-
-  function openAdd() {
-    setEditId(null);
-    setForm(emptyForm);
-    setOpen(true);
-  }
-
-  function openEdit(t: task) {
-    setEditId(t._id);
-    setForm({
-      title: t.title,
-      description: t.description ?? "",
-      due_date: t.due_date ? t.due_date.slice(0, 16) : "",
-      priority: t.priority,
-      tag: t.tag ?? "none",
-      completed: t.completed,
-    });
-    setOpen(true);
-  }
-
-  async function handleSave() {
-    if (saving) return; // a request in motion 
-    if (form.title.trim().length === 0) return;
-
-    const payload = {
-      title: form.title.trim(),
-      description: form.description.trim(), // always send (empty string clears it)
-      due_date: form.due_date || undefined,
-      priority: form.priority,
-      tag: form.tag === "none" ? undefined : form.tag,
-      completed: form.completed,
-    };
-
-    setSaving(true);
-    try {
+  const form = useForm({
+    defaultValues: emptyForm,
+    validators: { onChange: taskFormSchema },
+    onSubmit: async ({ value }) => {
+      const payload = toPayload(value);
       if (editId) {
         await saveTask(editId, payload);
         toast.success("Task updated");
@@ -105,9 +70,31 @@ function TasksPage() {
         toast.success("Task added");
       }
       setOpen(false);
-    } finally {
-      setSaving(false);
-    }
+    },
+  });
+
+  // Sorting and Filter
+  const [sortBy, setSortBy] = useState<"added" | "due" | "priority" | "tag">("added");
+  const [filterTag, setFilterTag] = useState<Tag | "all">("all");
+  const [filterPriority, setFilterPriority] = useState<Priority | "all">("all");
+
+  function openAdd() {
+    setEditId(null);
+    form.reset(emptyForm);
+    setOpen(true);
+  }
+
+  function openEdit(t: task) {
+    setEditId(t._id);
+    form.reset({
+      title: t.title,
+      description: t.description ?? "",
+      due_date: t.due_date ? t.due_date.slice(0, 16) : "",
+      priority: t.priority,
+      tag: t.tag ?? "none",
+      completed: t.completed,
+    });
+    setOpen(true);
   }
 
   async function handleDelete() {
@@ -126,12 +113,6 @@ function TasksPage() {
         },
       },
     });
-  }
-
-  function cyclePriority() {
-    const next =
-      PRIORITY_ORDER[(PRIORITY_ORDER.indexOf(form.priority) + 1) % 3];
-    setForm({ ...form, priority: next });
   }
 
   // rank maps so "sort by priority/tag" has a defined order (maps)
@@ -223,14 +204,20 @@ function TasksPage() {
 
      {/*Task Cards (depends on filter and sort)*/}  
       <div className="flex flex-col gap-2">
-        {visible.map((t) => (
-          <TaskCard
-            key={t._id}
-            task={t}
-            onToggle={toggleCompleted}
-            onEdit={openEdit}
-          />
-        ))}
+        {isLoading ? (
+          <p className="text-muted-foreground text-sm">Loading…</p>
+        ) : isError ? (
+          <p className="text-destructive text-sm">Failed to load tasks.</p>
+        ) : (
+          visible.map((t) => (
+            <TaskCard
+              key={t._id}
+              task={t}
+              onToggle={toggleCompleted}
+              onEdit={openEdit}
+            />
+          ))
+        )}
       </div>
 
       {/*Add button Floating*/}
@@ -253,54 +240,92 @@ function TasksPage() {
 
           {/* top bar: wraps so nothing overflows the dialog */}
           <div className="flex flex-wrap items-center gap-2 border-b pb-3 text-muted-foreground">
-            <Checkbox
-              checked={form.completed}
-              onCheckedChange={(c) => setForm({ ...form, completed: !!c })}
-            />
-            <DateTimePicker
-              value={form.due_date}
-              onChange={(v) => setForm({ ...form, due_date: v })}
-            />
-            <Select
-              value={form.tag}
-              onValueChange={(v) => setForm({ ...form, tag: v as Tag | "none" })}
-            >
-              <SelectTrigger className="min-w-0 flex-1">
-                <SelectValue placeholder="Tag" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No tag</SelectItem>
-                {TAG_OPTIONS.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <button
-              type="button"
-              onClick={cyclePriority}
-              title={`Priority: ${form.priority}`}
-            >
-              <Flag className={`size-5 ${priorityColor[form.priority]}`} />
-            </button>
+            <form.Field name="completed">
+              {(field) => (
+                <Checkbox
+                  checked={field.state.value}
+                  onCheckedChange={(c) => field.handleChange(!!c)}
+                />
+              )}
+            </form.Field>
+            <form.Field name="due_date">
+              {(field) => (
+                <DateTimePicker
+                  value={field.state.value}
+                  onChange={(v) => field.handleChange(v)}
+                />
+              )}
+            </form.Field>
+            <form.Field name="tag">
+              {(field) => (
+                <Select
+                  value={field.state.value}
+                  onValueChange={(v) => field.handleChange(v as Tag | "none")}
+                >
+                  <SelectTrigger className="min-w-0 flex-1">
+                    <SelectValue placeholder="Tag" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No tag</SelectItem>
+                    {TAG_OPTIONS.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </form.Field>
+            <form.Field name="priority">
+              {(field) => (
+                <button
+                  type="button"
+                  onClick={() =>
+                    field.handleChange(
+                      PRIORITY_ORDER[
+                        (PRIORITY_ORDER.indexOf(field.state.value) + 1) % 3
+                      ]
+                    )
+                  }
+                  title={`Priority: ${field.state.value}`}
+                >
+                  <Flag className={`size-5 ${priorityColor[field.state.value]}`} />
+                </button>
+              )}
+            </form.Field>
           </div>
 
           {/* title */}
-          <input
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            placeholder="Task title"
-            className="w-full bg-transparent text-lg font-bold outline-none"
-          />
+          <form.Field name="title">
+            {(field) => (
+              <div>
+                <input
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                  placeholder="Task title"
+                  className="w-full bg-transparent text-lg font-bold outline-none"
+                />
+                {field.state.meta.errors.length > 0 && (
+                  <p className="text-destructive mt-1 text-sm">
+                    {field.state.meta.errors.map((e) => e?.message).join(", ")}
+                  </p>
+                )}
+              </div>
+            )}
+          </form.Field>
 
           {/* description: auto-grows to a max, then scrolls */}
-          <Textarea
-            value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-            placeholder="Description"
-            className="field-sizing-content max-h-60 min-h-24 resize-none overflow-y-auto border-0 shadow-none focus-visible:ring-0"
-          />
+          <form.Field name="description">
+            {(field) => (
+              <Textarea
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                placeholder="Description"
+                className="field-sizing-content max-h-60 min-h-24 resize-none overflow-y-auto border-0 shadow-none focus-visible:ring-0"
+              />
+            )}
+          </form.Field>
 
           <DialogFooter>
             {editId && (
@@ -316,7 +341,7 @@ function TasksPage() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete this task?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This permanently removes “{form.title}”. This can’t be undone.
+                      This permanently removes “{form.state.values.title}”. This can’t be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -328,9 +353,21 @@ function TasksPage() {
                 </AlertDialogContent>
               </AlertDialog>
             )}
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Saving…" : editId ? "Save" : "Add"}
-            </Button>
+            <form.Subscribe
+              selector={(s) => ({
+                canSubmit: s.canSubmit,
+                isSubmitting: s.isSubmitting,
+              })}
+            >
+              {({ canSubmit, isSubmitting }) => (
+                <Button
+                  onClick={() => form.handleSubmit()}
+                  disabled={!canSubmit || isSubmitting}
+                >
+                  {isSubmitting ? "Saving…" : editId ? "Save" : "Add"}
+                </Button>
+              )}
+            </form.Subscribe>
           </DialogFooter>
         </DialogContent>
       </Dialog>

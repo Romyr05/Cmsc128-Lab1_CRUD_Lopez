@@ -1,56 +1,75 @@
 // For separation of concerns
 
-import { useEffect, useState } from "react";
 import type { task } from "@/types/task";
 import { getTasks, createTasks, updateTask, deleteTask, restoreTask } from "@/api/tasks";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // Gets first input of tasks with the same type
 type CreateInput = Parameters<typeof createTasks>[0];
 
-
 export function useTasks() {
-  const [tasks, setTasks] = useState<task[]>([]);
+  const queryClient = useQueryClient();
 
-  // load once on mount
-  useEffect(() => {
-    getTasks().then(setTasks).catch(console.error);
-  }, []);
+  // reused so we don't repeat the invalidate object everywhere
+  const invalidateTasks = () =>
+    queryClient.invalidateQueries({ queryKey: ["tasks"] });
 
-  async function addTask(payload: CreateInput) {
-    const created = await createTasks(payload);
-    setTasks((prev) => [created, ...prev]);
+  // READ
+  const { data: tasks = [], isLoading, isError } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: getTasks,
+  });
+
+  // WRITES
+  const toggleMutation = useMutation({
+    mutationFn: (t: task) => updateTask(t._id, { completed: !t.completed }),
+    onSuccess: invalidateTasks,
+  });
+
+  const addMutation = useMutation({
+    mutationFn: (payload: CreateInput) => createTasks(payload),
+    onSuccess: invalidateTasks,
+  });
+
+  // two args, bundle into one object
+  const saveMutation = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<task> }) =>
+      updateTask(id, updates),
+    onSuccess: invalidateTasks,
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: (id: string) => deleteTask(id),
+    onSuccess: invalidateTasks,
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: (id: string) => restoreTask(id),
+    onSuccess: invalidateTasks,
+  });
+
+
+    // Function calls 
+  function toggleCompleted(t: task) {
+    toggleMutation.mutate(t);
   }
-
-  async function saveTask(id: string, updates: Partial<task>) {
-    const updated = await updateTask(id, updates);
-    setTasks((prev) => prev.map((t) => (t._id === id ? updated : t)));
+  function addTask(payload: CreateInput) {
+    return addMutation.mutateAsync(payload);
   }
-
-  // Soft delete on later 
-  async function removeTask(id: string) {
-    await deleteTask(id);
-    setTasks((prev) => prev.filter((t) => t._id !== id));
+  function saveTask(id: string, updates: Partial<task>) {
+    return saveMutation.mutateAsync({ id, updates });
   }
-
-  // undo it 
-  async function undoDelete(id: string) {
-    const restored = await restoreTask(id);
-    setTasks((prev) =>
-      [restored, ...prev].sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()   // Depends on created at time to get it back
-      )
-    );
+  function removeTask(id: string) {
+    return removeMutation.mutateAsync(id);
   }
-
-  
-  async function toggleCompleted(t: task) {
-    const updated = await updateTask(t._id, { completed: !t.completed });
-    setTasks((prev) => prev.map((x) => (x._id === t._id ? updated : x)));
+  function undoDelete(id: string) {
+    return restoreMutation.mutateAsync(id);
   }
 
   return {
     tasks,
+    isLoading,
+    isError,
     addTask,
     saveTask,
     removeTask,
