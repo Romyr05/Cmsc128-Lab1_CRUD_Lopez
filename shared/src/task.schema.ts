@@ -3,36 +3,29 @@ import { z } from "zod";
 // Exported as plain arrays so the frontend can build dropdowns from the SAME source of truth.
 export const priorities = ["low", "medium", "high"] as const;
 export const tags = ["curricular", "extra-curricular", "home"] as const;
+export const TITLE_MAX_LENGTH = 200;
 
 export const prioritySchema = z.enum(priorities);
 export const tagSchema = z.enum(tags);
 
-// A due date must be at least 1 day from now.
-function isAtLeastOneDayAway(date: Date): boolean {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return date >= tomorrow;
-}
-
-// The fields a client may send. Shared by create (required) and update (partial).
-const taskShape = z.object({
-  title: z.string().trim().min(1, "Title is required"),
-  priority: prioritySchema,
-  due_date: z.coerce.date().optional(),
-  tag: tagSchema.optional(),
-  description: z.string().trim().optional(),
-  completed: z.boolean().optional(),
-});
-
-const dueDateIsValid = (data: { due_date?: Date }) =>
-  !data.due_date || isAtLeastOneDayAway(data.due_date);
-const dueDateError = { message: "Due date must be at least 1 day from now", path: ["due_date"] };
 
 // POST /api/tasks — title & priority required.
-export const createTaskSchema = taskShape.refine(dueDateIsValid, dueDateError);
+export const createTaskSchema = z.object({
+  title:z
+  .string()
+  .trim()
+  .min(1, "Title is required")
+  .max(TITLE_MAX_LENGTH, `Title must be at most ${TITLE_MAX_LENGTH}`),
+  priority: prioritySchema,
+  due_date: z.coerce.date().optional(),
+  tag:tagSchema.optional(),
+  description: z.string().trim().optional(),
+  completed: z.boolean().optional(),
+
+});
 
 // PUT /api/tasks/:id — any subset of fields (.partial() makes every field optional).
-export const updateTaskSchema = taskShape.partial().refine(dueDateIsValid, dueDateError);
+export const updateTaskSchema = createTaskSchema.partial()
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;

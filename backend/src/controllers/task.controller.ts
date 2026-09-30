@@ -25,27 +25,35 @@ export async function getTasks(_: Request, res:Response): Promise<void> {  //_ f
 
 //Create
 export async function createTasks(req: Request, res: Response): Promise<void>{
-    try {
-        const {title, due_date, priority, completed, tag, description} = req.body
-        if (due_date && !isValidDueDate(new Date(due_date))) {
-            res.status(400).json({ message: "Due date must be at least 1 day from now" });
-            return;
-        }
+    // Body is already validated & whitelisted by validateBody(createTaskSchema).
+    // Business rule stays here: due_date arrives as a Date thanks to z.coerce.date().
+    const { due_date } = req.body
+    if (due_date && !isValidDueDate(due_date)) {
+        res.status(400).json({ message: "Due date must be at least 1 day from now" });
+        return;
+    }
 
-        const task = await Task.create({title, due_date, priority, completed, tag, description})
+    try {
+        const task = await Task.create(req.body)
         res.status(201).json(task)
     } catch (error) {
         console.error("Create task error:", error)
-        res.status(400).json({message: "Create Task Failed"})
+        res.status(500).json({message: "Create Task Failed"})
     }
 }
 
 // Update
 export async function updateTask(req: Request, res:Response): Promise<void> {
+    const { due_date } = req.body
+    if (due_date && !isValidDueDate(due_date)) {
+        res.status(400).json({ message: "Due date must be at least 1 day from now" });
+        return;
+    }
+
     try {
         const tasks = await Task.findByIdAndUpdate(req.params.id, req.body, {
             //Options
-            new: true, 
+            new: true,
             runValidators: true
         })
         if(!tasks){
