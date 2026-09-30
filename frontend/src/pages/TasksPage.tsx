@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { Flag, Plus, Trash2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Flag, LogOut, Plus, Trash2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import type { task, Priority, Tag } from "@/types/task";
 import {
   Select,
@@ -52,6 +54,14 @@ function TasksPage() {
   //on hooks
   const { tasks, isLoading, isError, addTask, saveTask, removeTask, undoDelete, toggleCompleted } =
     useTasks();
+
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  async function handleLogout() {
+    await signOut();
+    navigate("/login");
+  }
 
   //editor
   const [open, setOpen] = useState(false);
@@ -147,6 +157,19 @@ function TasksPage() {
 
   return (
     <div className="mx-auto max-w-md p-4">
+      <div className="mb-4 flex items-center justify-between">
+        <Link
+          to="/profile"
+          className="text-sm font-medium underline-offset-4 hover:underline"
+          title="View profile"
+        >
+          Hello, {user?.name}
+        </Link>
+        <Button variant="outline" size="sm" onClick={handleLogout}>
+          <LogOut className="size-4" /> Logout
+        </Button>
+      </div>
+
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl font-bold">To Do List</h1>
         <span className="text-muted-foreground text-sm">{tasks.length}</span>
