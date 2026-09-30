@@ -1,4 +1,4 @@
-import { string, z } from "zod";
+import { z } from "zod";
 
 // Exported as plain arrays so the frontend can build dropdowns from the SAME source of truth.
 export const priorities = ["low", "medium", "high"] as const;
