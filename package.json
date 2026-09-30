@@ -8,6 +8,7 @@
     "dev": "pnpm -r --parallel dev"
   },
   "dependencies": {
+    "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-query": "^5.104.0"
   }
 }
