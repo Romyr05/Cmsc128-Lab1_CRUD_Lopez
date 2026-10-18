@@ -14,9 +14,9 @@ function isValidDueDate(due_date: Date): boolean {
 // CRUD (Create, Read, Update, Delete)
 
 //Read
-export async function getTasks(_: Request, res:Response): Promise<void> {  //_ for those unused because of ts 
+export async function getTasks(req: Request, res:Response): Promise<void> {  //_ for those unused because of ts 
     try {
-        const tasks = await Task.find({ deletedAt: null }).sort({ createdAt: -1}); // active only, newest first
+        const tasks = await Task.find({ owner:  req.session.userId, deletedAt: null }).sort({ createdAt: -1}); // active only, newest first
         res.json(tasks)
     } catch (error) {
         res.status(500).json({ message: "Fetching failed"})
@@ -34,7 +34,7 @@ export async function createTasks(req: Request, res: Response): Promise<void>{
     }
 
     try {
-        const task = await Task.create(req.body)
+        const task = await Task.create({...req.body, owner: req.session.userId})
         res.status(201).json(task)
     } catch (error) {
         console.error("Create task error:", error)
@@ -51,7 +51,8 @@ export async function updateTask(req: Request, res:Response): Promise<void> {
     }
 
     try {
-        const tasks = await Task.findByIdAndUpdate(req.params.id, req.body, {
+        // Filter by id AND owner: another user's task won't match -> null -> 404 (prevents IDOR)
+        const tasks = await Task.findOneAndUpdate({ _id: req.params.id, owner: req.session.userId }, req.body, {
             //Options
             new: true,
             runValidators: true
@@ -70,8 +71,8 @@ export async function updateTask(req: Request, res:Response): Promise<void> {
 // Soft delete: mark the task instead of removing it
 export async function deleteTask(req: Request, res: Response): Promise<void> {
     try {
-        const task = await Task.findByIdAndUpdate(
-            req.params.id,
+        const task = await Task.findOneAndUpdate(
+            { _id: req.params.id, owner: req.session.userId },
             { deletedAt: new Date() },
             { new: true }
         )
@@ -89,8 +90,8 @@ export async function deleteTask(req: Request, res: Response): Promise<void> {
 // Undo a soft delete
 export async function restoreTask(req: Request, res: Response): Promise<void> {
     try {
-        const task = await Task.findByIdAndUpdate(
-            req.params.id,
+        const task = await Task.findOneAndUpdate(
+            { _id: req.params.id, owner: req.session.userId },
             { deletedAt: null },
             { new: true }
         )

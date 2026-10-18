@@ -4,8 +4,11 @@ import { getTasks,createTasks, deleteTask, updateTask, restoreTask } from "../co
 import { validateBody, validateParams } from "../middleware/validate.js";
 import { createTaskSchema, updateTaskSchema } from "shared";
 import { taskIdSchema } from "../schemas/taskIdSchema.js";
+import {checkAuth} from "../middleware/requireAuth.js"
 
 const router = Router()
+
+router.use(checkAuth)
 
 //CRUD routing
 router.get("/", getTasks)

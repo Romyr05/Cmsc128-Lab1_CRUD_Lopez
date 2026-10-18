@@ -1,4 +1,4 @@
-import {Schema, Document} from "mongoose"
+import {Schema, Document, Types} from "mongoose"
 
 //Creating Schema for tasks
 
@@ -23,6 +23,7 @@ export interface interTask extends Document{
     tag?: Tag_Enum,   // One optional tag
     description?: string, // Optional Description
     deletedAt?: Date | null,  // null/absent = active; a date = soft-deleted
+    owner: Types.ObjectId,  // Reference to the user who owns the task
 }
 
 export const taskSchema = new Schema<interTask>({
@@ -55,5 +56,11 @@ export const taskSchema = new Schema<interTask>({
         type: Date,
         default: null,
     },
+    owner: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',  // Reference to the User model
+        required: true,
+        index:true, //for faster queries 
+    }
 
 }, {timestamps: true})  

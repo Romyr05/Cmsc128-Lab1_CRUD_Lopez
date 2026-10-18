@@ -7,7 +7,7 @@ const api_url = import.meta.env.VITE_API_URL
 
 //READ
 export async function getTasks(): Promise<task[]> {
-    const res = await fetch(api_url)
+    const res = await fetch(api_url, { credentials: "include" }) // send the session cookie
     if(!res.ok) throw new Error("Fetching tasks failed")
     return res.json()
 }
@@ -23,6 +23,7 @@ export async function createTasks( data : {
 }): Promise<task> {
     const res = await fetch(api_url, {
         method: "POST",
+        credentials: "include",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data)
     })
@@ -40,6 +41,7 @@ export async function updateTask(
 ): Promise<task> {
     const res = await fetch(`${api_url}/${id}`, {
         method: "PUT",
+        credentials: "include",
         headers: {
             "Content-Type": "application/json"
         },
@@ -55,7 +57,8 @@ export async function updateTask(
 //Delete
 export async function deleteTask(id: string): Promise<void> {
     const res = await fetch(`${api_url}/${id}`, {
-        method: "DELETE"
+        method: "DELETE",
+        credentials: "include",
     })
     if (!res.ok){
         throw new Error("Delete task failed")
@@ -65,7 +68,8 @@ export async function deleteTask(id: string): Promise<void> {
 // Undo a soft delete
 export async function restoreTask(id: string): Promise<task> {
     const res = await fetch(`${api_url}/${id}/restore`, {
-        method: "PATCH"
+        method: "PATCH",
+        credentials: "include",
     })
     if (!res.ok){
         throw new Error("Restore task failed")
