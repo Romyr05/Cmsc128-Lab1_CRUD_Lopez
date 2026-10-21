@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Link, useNavigate } from "react-router-dom";
-import { Flag, LogOut, Plus, Trash2 } from "lucide-react";
+import { Flag, LogOut, Plus, Trash2, Users } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import type { task, Priority, Tag } from "@/types/task";
 import {
@@ -38,6 +38,8 @@ import { DateTimePicker } from "@/components/DateTimePicker";
 import { TaskCard } from "@/components/TaskCard";
 import { PRIORITY_ORDER, priorityColor } from "@/lib/priority";
 import { useTasks } from "@/hooks/useTasks";
+import { useLists } from "@/hooks/useLists";
+import { MembersDialog } from "@/components/MembersDialog";
 import { taskFormSchema, toPayload, type TaskFormValues } from "@/lib/taskForm";
 
 
@@ -51,12 +53,30 @@ const emptyForm: TaskFormValues = {
 };
 
 function TasksPage() {
-  //on hooks
-  const { tasks, isLoading, isError, addTask, saveTask, removeTask, undoDelete, toggleCompleted } =
-    useTasks();
-
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+
+  // Personal vs group list view: "personal" or a list's _id
+  const { lists, createGroupList } = useLists();
+  const [view, setView] = useState<string>("personal");
+  const [membersOpen, setMembersOpen] = useState(false);
+  // If the selected list disappears (e.g. I was removed), fall back to personal
+  const activeList = lists.find((l) => l._id === view) ?? null;
+  const ownsAList = lists.some((l) => l.myRole === "owner");
+  const readOnly = activeList?.myRole === "view"; // UI only; the backend enforces it
+
+  async function handleCreateList() {
+    try {
+      await createGroupList(`${user?.name}'s Group List`);
+      toast.success("Group list created");
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  }
+
+  //on hooks
+  const { tasks, isLoading, isError, addTask, saveTask, removeTask, undoDelete, toggleCompleted } =
+    useTasks(activeList?._id ?? null);
 
   async function handleLogout() {
     await signOut();
@@ -170,9 +190,49 @@ function TasksPage() {
         </Button>
       </div>
 
+      {/* Personal / group list switcher */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <Button
+          size="sm"
+          variant={activeList ? "outline" : "default"}
+          onClick={() => setView("personal")}
+        >
+          Personal
+        </Button>
+        {lists.map((l) => (
+          <Button
+            key={l._id}
+            size="sm"
+            variant={activeList?._id === l._id ? "default" : "outline"}
+            onClick={() => setView(l._id)}
+          >
+            {l.name}
+          </Button>
+        ))}
+        {!ownsAList && (
+          <Button size="sm" variant="ghost" onClick={handleCreateList}>
+            <Plus className="size-4" /> Create group list
+          </Button>
+        )}
+      </div>
+
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold">To Do List</h1>
-        <span className="text-muted-foreground text-sm">{tasks.length}</span>
+        <div className="min-w-0">
+          <h1 className="truncate text-xl font-bold">{activeList ? activeList.name : "To Do List"}</h1>
+          {activeList && activeList.myRole !== "owner" && (
+            <p className="text-muted-foreground text-xs">
+              Shared by {activeList.owner.name} · you can {activeList.myRole}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {activeList?.myRole === "owner" && (
+            <Button variant="outline" size="sm" onClick={() => setMembersOpen(true)}>
+              <Users className="size-4" /> Members
+            </Button>
+          )}
+          <span className="text-muted-foreground text-sm">{tasks.length}</span>
+        </div>
       </div>
 
       {/* sort & filter toolbar: sort on the left, filters on the right */}
@@ -238,19 +298,26 @@ function TasksPage() {
               task={t}
               onToggle={toggleCompleted}
               onEdit={openEdit}
+              readOnly={readOnly}
             />
           ))
         )}
       </div>
 
-      {/*Add button Floating*/}
-      <Button
-        onClick={openAdd}
-        aria-label="Add task"
-        className="fixed bottom-6 right-6 size-14 rounded-full shadow-lg"
-      >
-        <Plus className="size-6" />
-      </Button>
+      {/*Add button Floating (hidden for view-only members)*/}
+      {!readOnly && (
+        <Button
+          onClick={openAdd}
+          aria-label="Add task"
+          className="fixed bottom-6 right-6 size-14 rounded-full shadow-lg"
+        >
+          <Plus className="size-6" />
+        </Button>
+      )}
+
+      {activeList?.myRole === "owner" && (
+        <MembersDialog list={activeList} open={membersOpen} onOpenChange={setMembersOpen} />
+      )}
 
       {/* Shared Editor for both add and edit */}
       <Dialog open={open} onOpenChange={setOpen}>

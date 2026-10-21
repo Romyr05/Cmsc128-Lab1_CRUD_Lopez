@@ -9,19 +9,21 @@ type TaskCardProps = {
   task: task;
   onToggle: (t: task) => void;
   onEdit: (t: task) => void;
+  readOnly?: boolean;  // view-only list member: no editing (backend also enforces this)
 };
 
-export function TaskCard({ task, onToggle, onEdit }: TaskCardProps) {
+export function TaskCard({ task, onToggle, onEdit, readOnly = false }: TaskCardProps) {
   return (
     <Card
-      onClick={() => onEdit(task)}
-      className="cursor-pointer transition-colors hover:bg-accent/40"
+      onClick={readOnly ? undefined : () => onEdit(task)}
+      className={readOnly ? "" : "cursor-pointer transition-colors hover:bg-accent/40"}
     >
       <CardContent className="flex items-start gap-3 p-4">
         {/* Stop unwanted Propagation, not click the onEdit (Go up the Parent) */}
-        <span onClick={(e) => e.stopPropagation()}>    
+        <span onClick={(e) => e.stopPropagation()}>
           <Checkbox
             checked={task.completed}
+            disabled={readOnly}
             onCheckedChange={() => onToggle(task)}
             className={priorityCheckbox[task.priority]}
           />

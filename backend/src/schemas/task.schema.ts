@@ -24,6 +24,7 @@ export interface interTask extends Document{
     description?: string, // Optional Description
     deletedAt?: Date | null,  // null/absent = active; a date = soft-deleted
     owner: Types.ObjectId,  // Reference to the user who owns the task
+    list?: Types.ObjectId | null,  // Reference to the List; null = personal task
 }
 
 export const taskSchema = new Schema<interTask>({
@@ -60,7 +61,13 @@ export const taskSchema = new Schema<interTask>({
         type: Schema.Types.ObjectId,
         ref: 'User',  // Reference to the User model
         required: true,
-        index:true, //for faster queries 
+        index:true, //for faster queries
+    },
+    list: {
+        type: Schema.Types.ObjectId,
+        ref: 'List',  // Reference to the List model
+        default: null, // null = personal task
+        index: true,  // list views filter 
     }
 
 }, {timestamps: true})  

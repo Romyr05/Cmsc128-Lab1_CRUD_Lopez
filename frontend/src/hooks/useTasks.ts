@@ -7,17 +7,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 // Gets first input of tasks with the same type
 type CreateInput = Parameters<typeof createTasks>[0];
 
-export function useTasks() {
+// listId = null -> personal tasks; a list id -> that group list's tasks
+export function useTasks(listId: string | null = null) {
   const queryClient = useQueryClient();
 
   // reused so we don't repeat the invalidate object everywhere
+  // ["tasks"] is a prefix, so this refreshes personal and every list's cache
   const invalidateTasks = () =>
     queryClient.invalidateQueries({ queryKey: ["tasks"] });
 
-  // READ
+  // READ: separate cache per view so switching tabs doesn't mix tasks
   const { data: tasks = [], isLoading, isError } = useQuery({
-    queryKey: ["tasks"],
-    queryFn: getTasks,
+    queryKey: ["tasks", listId ?? "personal"],
+    queryFn: () => getTasks(listId ?? undefined),
   });
 
   // WRITES
@@ -27,7 +29,9 @@ export function useTasks() {
   });
 
   const addMutation = useMutation({
-    mutationFn: (payload: CreateInput) => createTasks(payload),
+    // new tasks go into whichever view is open
+    mutationFn: (payload: CreateInput) =>
+      createTasks({ ...payload, list: listId ?? undefined }),
     onSuccess: invalidateTasks,
   });
 

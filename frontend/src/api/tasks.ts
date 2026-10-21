@@ -5,9 +5,10 @@ const api_url = import.meta.env.VITE_API_URL
 
 //CRUD
 
-//READ
-export async function getTasks(): Promise<task[]> {
-    const res = await fetch(api_url, { credentials: "include" }) // send the session cookie
+//READ: no listId = my personal tasks, listId = that group list's tasks
+export async function getTasks(listId?: string): Promise<task[]> {
+    const url = listId ? `${api_url}?list=${listId}` : api_url
+    const res = await fetch(url, { credentials: "include" }) // send the session cookie
     if(!res.ok) throw new Error("Fetching tasks failed")
     return res.json()
 }
@@ -20,6 +21,7 @@ export async function createTasks( data : {
     tag?: Tag,
     description?: string,
     completed?: boolean,
+    list?: string,   // omit = personal task
 }): Promise<task> {
     const res = await fetch(api_url, {
         method: "POST",

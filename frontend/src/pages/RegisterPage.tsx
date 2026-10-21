@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { register } from "@/api/auth";
 import { registerSchema } from "@/lib/authSchema";
@@ -18,6 +19,7 @@ import { Label } from "@/components/ui/label";
 function RegisterPage() {
   const navigate = useNavigate();
   const { setUser } = useAuth();
+  const queryClient = useQueryClient();
   const [formError, setFormError] = useState<string | null>(null);
 
 
@@ -29,6 +31,7 @@ function RegisterPage() {
       try {
         const user = await register(value);
         // register starts a session, so log in immediately.
+        queryClient.clear(); // drop any previous user's cached tasks/lists
         setUser(user);
         navigate("/");
       } catch (err) {

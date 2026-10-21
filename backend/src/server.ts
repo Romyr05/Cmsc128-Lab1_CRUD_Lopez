@@ -5,6 +5,7 @@ import 'dotenv/config';
 import { connectDB } from "./config/db.js";
 import taskRoutes from "./routes/task.routes.js"
 import authRoutes from "./routes/auth.routes.js"
+import listRoutes from "./routes/list.routes.js"
 import MongoStore from "connect-mongo";
 import session from "express-session";
 import mongoose from "mongoose";
@@ -37,6 +38,7 @@ app.use(session({
 
 app.use("/api/tasks", taskRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/lists", listRoutes);
 
 
 app.get("/",(_: Request, res: Response) => {

@@ -21,11 +21,13 @@ export const createTaskSchema = z.object({
   tag:tagSchema.optional(),
   description: z.string().trim().optional(),
   completed: z.boolean().optional(),
+  list: z.string().regex(/^[a-f\d]{24}$/i, "Invalid list id").optional(), // omit = personal task
 
 });
 
 // PUT /api/tasks/:id — any subset of fields (.partial() makes every field optional).
-export const updateTaskSchema = createTaskSchema.partial()
+// list is omitted: a task can't be moved between personal/lists after creation.
+export const updateTaskSchema = createTaskSchema.omit({ list: true }).partial()
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;

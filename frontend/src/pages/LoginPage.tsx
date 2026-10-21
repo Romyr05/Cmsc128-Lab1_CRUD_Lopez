@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "@/api/auth";
 import { loginSchema } from "@/lib/authSchema";
@@ -18,6 +19,7 @@ import { Label } from "@/components/ui/label";
 function LoginPage() {
   const navigate = useNavigate();
   const { setUser } = useAuth();
+  const queryClient = useQueryClient();
   const [formError, setFormError] = useState<string | null>(null);
 
   const form = useForm({
@@ -27,6 +29,7 @@ function LoginPage() {
       setFormError(null);
       try {
         const user = await login(value);
+        queryClient.clear(); // drop any previous user's cached tasks/lists
         setUser(user);
         navigate("/");
       } catch (err) {

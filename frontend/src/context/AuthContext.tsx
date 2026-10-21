@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { getMe, logout as logoutApi, type User } from "@/api/auth";
 
 type AuthContextValue = {
@@ -13,6 +14,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   // On first load, restore the session from the httpOnly cookie by asking
   // the backend who we are. 
@@ -26,6 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signOut() {
     await logoutApi();
+    queryClient.clear()
     setUser(null);
   }
 
