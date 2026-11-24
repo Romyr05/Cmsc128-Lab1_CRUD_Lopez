@@ -7,10 +7,11 @@ import { getListRole, canEdit } from "../utils/listAccess.js";
 
 
 
+// Due date can be today or later, never a past day (yesterday or before)
 function isValidDueDate(due_date: Date): boolean {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1); // now + 1 day
-    return due_date >= tomorrow;              // true = OK, false = too soon
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);  // midnight at the start of today
+    return due_date >= startOfToday;    // true = OK, false = in the past
 }
 
 // Find a task the logged-in user may modify, or send 404/403 and return null.
@@ -80,7 +81,7 @@ export async function createTasks(req: Request, res: Response): Promise<void>{
     // Business rule stays here: due_date arrives as a Date thanks to z.coerce.date().
     const { due_date, list } = req.body
     if (due_date && !isValidDueDate(due_date)) {
-        res.status(400).json({ message: "Due date must be at least 1 day from now" });
+        res.status(400).json({ message: "Due date can't be in the past" });
         return;
     }
 
@@ -109,14 +110,18 @@ export async function createTasks(req: Request, res: Response): Promise<void>{
 // Update
 export async function updateTask(req: Request, res:Response): Promise<void> {
     const { due_date } = req.body
-    if (due_date && !isValidDueDate(due_date)) {
-        res.status(400).json({ message: "Due date must be at least 1 day from now" });
-        return;
-    }
 
     try {
         const task = await findEditableTask(req, res)
         if (!task) return  // 404/403 already sent
+
+        // Only check a due date the user CHANGED, so an overdue task can still be edited.
+        // getTime() compares the instants by value (two Date objects are never ===)
+        const dateChanged = due_date && due_date.getTime() !== task.due_date?.getTime()
+        if (dateChanged && !isValidDueDate(due_date)) {
+            res.status(400).json({ message: "Due date can't be in the past" });
+            return;
+        }
 
         Object.assign(task, req.body)  // body is whitelisted (no owner/list), so only task fields change
         await task.save()              // save() runs schema validators

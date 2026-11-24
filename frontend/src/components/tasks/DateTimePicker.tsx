@@ -13,6 +13,14 @@ type DateTimePickerProps = {
   onChange: (v: string) => void;
 };
 
+// true for days before today. The calendar calls this per day, so new Date()
+// isn't run during render (keeps the component pure)
+function isPastDay(day: Date): boolean {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  return day < startOfToday;
+}
+
 //Date time Picker for those Date related functions
 export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
   const datePart = value ? value.slice(0, 10) : "";
@@ -46,7 +54,13 @@ export function DateTimePicker({ value, onChange }: DateTimePickerProps) {
         )}
       />
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar mode="single" selected={selected} onSelect={handleDate} />
+        {/* past days are greyed out (the backend enforces this too) */}
+        <Calendar
+          mode="single"
+          selected={selected}
+          onSelect={handleDate}
+          disabled={isPastDay}
+        />
         <div className="border-t p-2">
           <input
             type="time"
