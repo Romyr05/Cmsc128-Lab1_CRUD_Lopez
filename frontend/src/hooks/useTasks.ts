@@ -55,7 +55,7 @@ export function useTasks(listId: string | null = null) {
 
     // Function calls 
   function toggleCompleted(t: task) {
-    toggleMutation.mutate(t);
+    return toggleMutation.mutateAsync(t); // returns a promise so the page can catch errors
   }
   function addTask(payload: CreateInput) {
     return addMutation.mutateAsync(payload);

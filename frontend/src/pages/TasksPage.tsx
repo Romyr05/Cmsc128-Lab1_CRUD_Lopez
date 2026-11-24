@@ -54,14 +54,22 @@ function TasksPage() {
 
   async function handleSubmit(value: TaskFormValues) {
     const payload = toPayload(value);
-    if (editing) {
-      await saveTask(editing._id, payload);
-      toast.success("Task updated");
-    } else {
-      await addTask(payload);
-      toast.success("Task added");
+    try {
+      if (editing) {
+        await saveTask(editing._id, payload);
+        toast.success("Task updated");
+      } else {
+        await addTask(payload);
+        toast.success("Task added");
+      }
+      setOpen(false); // only close on success, so a failed save keeps the user's input
+    } catch (error) {
+      toast.error((error as Error).message);
     }
-    setOpen(false);
+  }
+
+  function handleToggle(t: task) {
+    toggleCompleted(t).catch((error: Error) => toast.error(error.message));
   }
 
   // Sorting and Filter
@@ -84,14 +92,20 @@ function TasksPage() {
     const deletedId = editing._id;
     setOpen(false);
 
-    await removeTask(deletedId); // soft-delete in the DB immediately
+    try {
+      await removeTask(deletedId); // soft-delete in the DB immediately
+    } catch (error) {
+      toast.error((error as Error).message);
+      return;
+    }
 
     toast("Task deleted", {
       duration: 3000,
       action: {
         label: "Undo",
         onClick: () => {
-          undoDelete(deletedId).catch(console.error); // clears the flag, restores same task
+          // clears the flag, restores same task
+          undoDelete(deletedId).catch((error: Error) => toast.error(error.message));
         },
       },
     });
@@ -159,7 +173,7 @@ function TasksPage() {
         tasks={visible}
         isLoading={isLoading}
         isError={isError}
-        onToggle={toggleCompleted}
+        onToggle={handleToggle}
         onEdit={openEdit}
         readOnly={readOnly}
       />

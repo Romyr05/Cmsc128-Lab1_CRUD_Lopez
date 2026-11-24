@@ -3,13 +3,24 @@ import type { task, Priority, Tag } from "../types/task"
 
 const api_url = import.meta.env.VITE_API_URL
 
+// Pull the backend's { message } out of an error response so toasts can show it
+// (e.g. "Due date can't be in the past", "You only have view access to this list").
+async function errorMessage(res: Response, fallback: string): Promise<string> {
+  try {
+    const body = await res.json();
+    return body?.message ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 //CRUD
 
 //READ: no listId = my personal tasks, listId = that group list's tasks
 export async function getTasks(listId?: string): Promise<task[]> {
     const url = listId ? `${api_url}?list=${listId}` : api_url
     const res = await fetch(url, { credentials: "include" }) // send the session cookie
-    if(!res.ok) throw new Error("Fetching tasks failed")
+    if(!res.ok) throw new Error(await errorMessage(res, "Fetching tasks failed"))
     return res.json()
 }
 
@@ -31,7 +42,7 @@ export async function createTasks( data : {
     })
 
     if (!res.ok){
-        throw new Error("Creating Task Failed")
+        throw new Error(await errorMessage(res, "Creating Task Failed"))
     } 
     return res.json()
 }
@@ -50,7 +61,7 @@ export async function updateTask(
         body: JSON.stringify(updates)
     })
     if (!res.ok){
-        throw new Error("Failed Update Task")
+        throw new Error(await errorMessage(res, "Failed Update Task"))
     }
     return res.json()
 }
@@ -63,7 +74,7 @@ export async function deleteTask(id: string): Promise<void> {
         credentials: "include",
     })
     if (!res.ok){
-        throw new Error("Delete task failed")
+        throw new Error(await errorMessage(res, "Delete task failed"))
     }
 }
 
@@ -74,7 +85,7 @@ export async function restoreTask(id: string): Promise<task> {
         credentials: "include",
     })
     if (!res.ok){
-        throw new Error("Restore task failed")
+        throw new Error(await errorMessage(res, "Restore task failed"))
     }
     return res.json()
 }
