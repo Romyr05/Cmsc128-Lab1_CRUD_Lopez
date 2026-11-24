@@ -3,10 +3,13 @@ import { useForm } from "@tanstack/react-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { resetPassword } from "@/api/auth";
-import { resetPasswordSchema } from "@/lib/authSchema";
+import { resetPasswordSchema } from "shared";
 import { Button } from "@/components/ui/button";
 import { AuthCard } from "@/components/shared/AuthCard";
 import { FormField } from "@/components/shared/FormField";
+
+// The form only has the password field; the token comes from the URL
+const newPasswordSchema = resetPasswordSchema.omit({ token: true });
 
 function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -16,7 +19,7 @@ function ResetPasswordPage() {
 
   const form = useForm({
     defaultValues: { password: "" },
-    validators: { onChange: resetPasswordSchema },
+    validators: { onChange: newPasswordSchema },
     onSubmit: async ({ value }) => {
       setFormError(null);
       try {

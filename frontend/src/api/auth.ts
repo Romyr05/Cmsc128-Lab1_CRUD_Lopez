@@ -3,7 +3,7 @@ import type {
   RegisterValues,
   ForgotPasswordValues,
   UpdateProfileValues,
-} from "@/lib/authSchema";
+} from "shared";
 
 // Auth endpoints live under /api/auth. Kept separate from VITE_API_URL
 

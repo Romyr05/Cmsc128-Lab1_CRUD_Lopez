@@ -3,7 +3,7 @@ import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "@/api/auth";
-import { loginSchema } from "@/lib/authSchema";
+import { loginSchema } from "shared";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { AuthCard } from "@/components/shared/AuthCard";

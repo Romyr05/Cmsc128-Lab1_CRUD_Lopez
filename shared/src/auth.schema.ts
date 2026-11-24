@@ -1,3 +1,5 @@
+// Shared by backend (request validation) and frontend (form validation),
+// so both sides always use the same rules.
 import { z } from "zod";
 
 // POST /api/auth/register — all fields required.
@@ -29,3 +31,9 @@ export const resetPasswordSchema = z.object({
   token: z.string().min(1, "Token is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
+
+// Types for the frontend forms and API calls
+export type LoginValues = z.infer<typeof loginSchema>;
+export type RegisterValues = z.infer<typeof registerSchema>;
+export type UpdateProfileValues = z.infer<typeof updateProfileSchema>;
+export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;

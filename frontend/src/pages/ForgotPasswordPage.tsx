@@ -3,7 +3,7 @@ import { useForm } from "@tanstack/react-form";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { forgotPassword } from "@/api/auth";
-import { forgotPasswordSchema } from "@/lib/authSchema";
+import { forgotPasswordSchema } from "shared";
 import { Button } from "@/components/ui/button";
 import { AuthCard } from "@/components/shared/AuthCard";
 import { FormField } from "@/components/shared/FormField";

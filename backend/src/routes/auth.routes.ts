@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { register, login, me, logout, forgotPassword, resetPassword, updateProfile } from "../controllers/auth.controller.js";
 import { validateBody } from "../middleware/validate.js";
-import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, updateProfileSchema } from "../schemas/auth.schema.js";
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, updateProfileSchema } from "shared";
 import { checkAuth } from "../middleware/requireAuth.js";
 
 const router = Router()

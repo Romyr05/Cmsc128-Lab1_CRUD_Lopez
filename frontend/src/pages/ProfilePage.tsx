@@ -3,7 +3,7 @@ import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { updateProfile } from "@/api/auth";
-import { updateProfileSchema } from "@/lib/authSchema";
+import { updateProfileSchema } from "shared";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { AuthCard } from "@/components/shared/AuthCard";
