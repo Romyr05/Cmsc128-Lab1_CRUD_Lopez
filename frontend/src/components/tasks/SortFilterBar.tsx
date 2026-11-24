@@ -1,4 +1,4 @@
-import type { Priority, Tag } from "@/types/task";
+import type { Priority, Tag } from "shared";
 import { TAG_OPTIONS } from "@/lib/tags";
 import type { SortBy } from "@/lib/sortTasks";
 import {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import type { task, Priority, Tag } from "@/types/task";
+import type { Task, Priority, Tag } from "shared";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useTasks } from "@/hooks/useTasks";
@@ -51,7 +51,7 @@ function TasksPage() {
 
   //editor
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<task | null>(null); // null = adding
+  const [editing, setEditing] = useState<Task | null>(null); // null = adding
 
   async function handleSubmit(value: TaskFormValues) {
     const payload = toPayload(value);
@@ -69,7 +69,7 @@ function TasksPage() {
     }
   }
 
-  function handleToggle(t: task) {
+  function handleToggle(t: Task) {
     toggleCompleted(t).catch((error: Error) => toast.error(error.message));
   }
 
@@ -83,7 +83,7 @@ function TasksPage() {
     setOpen(true);
   }
 
-  function openEdit(t: task) {
+  function openEdit(t: Task) {
     setEditing(t);
     setOpen(true);
   }

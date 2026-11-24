@@ -45,3 +45,6 @@ export const taskSchema = z.object({
   updatedAt: z.string(),
 });
 export type Task = z.infer<typeof taskSchema>;
+
+export type Priority = z.infer<typeof prioritySchema>;
+export type Tag = z.infer<typeof tagSchema>;

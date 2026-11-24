@@ -1,6 +1,6 @@
 // For separation of concerns
 
-import type { task } from "@/types/task";
+import type { Task } from "shared";
 import { getTasks, createTasks, updateTask, deleteTask, restoreTask } from "@/api/tasks";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -24,7 +24,7 @@ export function useTasks(listId: string | null = null) {
 
   // WRITES
   const toggleMutation = useMutation({
-    mutationFn: (t: task) => updateTask(t._id, { completed: !t.completed }),
+    mutationFn: (t: Task) => updateTask(t._id, { completed: !t.completed }),
     onSuccess: invalidateTasks,
   });
 
@@ -37,7 +37,7 @@ export function useTasks(listId: string | null = null) {
 
   // two args, bundle into one object
   const saveMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<task> }) =>
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Task> }) =>
       updateTask(id, updates),
     onSuccess: invalidateTasks,
   });
@@ -54,13 +54,13 @@ export function useTasks(listId: string | null = null) {
 
 
     // Function calls 
-  function toggleCompleted(t: task) {
+  function toggleCompleted(t: Task) {
     return toggleMutation.mutateAsync(t); // returns a promise so the page can catch errors
   }
   function addTask(payload: CreateInput) {
     return addMutation.mutateAsync(payload);
   }
-  function saveTask(id: string, updates: Partial<task>) {
+  function saveTask(id: string, updates: Partial<Task>) {
     return saveMutation.mutateAsync({ id, updates });
   }
   function removeTask(id: string) {

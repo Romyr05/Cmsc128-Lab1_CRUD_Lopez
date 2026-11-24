@@ -1,12 +1,12 @@
-import type { task } from "@/types/task";
+import type { Task } from "shared";
 import { TaskCard } from "@/components/tasks/TaskCard";
 
 type TaskListProps = {
-  tasks: task[]; // already filtered and sorted by the page
+  tasks: Task[]; // already filtered and sorted by the page
   isLoading: boolean;
   isError: boolean;
-  onToggle: (t: task) => void;
-  onEdit: (t: task) => void;
+  onToggle: (t: Task) => void;
+  onEdit: (t: Task) => void;
   readOnly: boolean;
 };
 

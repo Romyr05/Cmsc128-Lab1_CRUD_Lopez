@@ -1,4 +1,4 @@
-import type { Priority } from "@/types/task";
+import type { Priority } from "shared";
 
 //Priority Order Least to Highest
 export const PRIORITY_ORDER: Priority[] = ["low", "medium", "high"];

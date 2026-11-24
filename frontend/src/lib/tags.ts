@@ -1,4 +1,4 @@
-import type { Tag } from "@/types/task";
+import type { Tag } from "shared";
 
 export const TAG_OPTIONS: { value: Tag; label: string }[] = [
   { value: "curricular", label: "Curricular" },

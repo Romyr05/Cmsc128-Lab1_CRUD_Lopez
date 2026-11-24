@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { Flag, Trash2 } from "lucide-react";
-import type { task, Tag } from "@/types/task";
+import type { Task, Tag } from "shared";
 import { TAG_OPTIONS } from "@/lib/tags";
 import { PRIORITY_ORDER, priorityColor } from "@/lib/priority";
 import { taskFormSchema, type TaskFormValues } from "@/lib/taskForm";
@@ -45,7 +45,7 @@ const emptyForm: TaskFormValues = {
 };
 
 // Turn an existing task into form values (or a blank form when adding)
-function toFormValues(t: task | null): TaskFormValues {
+function toFormValues(t: Task | null): TaskFormValues {
   if (!t) return emptyForm;
   return {
     title: t.title,
@@ -60,7 +60,7 @@ function toFormValues(t: task | null): TaskFormValues {
 type TaskEditorDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  task: task | null; // null = adding a new task
+  task: Task | null; // null = adding a new task
   onSubmit: (values: TaskFormValues) => Promise<void>;
   onDelete: () => void;
 };

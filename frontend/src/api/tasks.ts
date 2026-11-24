@@ -1,4 +1,4 @@
-import type { task, Priority, Tag } from "../types/task"
+import type { Task, Priority, Tag } from "shared";
 
 
 const api_url = import.meta.env.VITE_API_URL
@@ -17,7 +17,7 @@ async function errorMessage(res: Response, fallback: string): Promise<string> {
 //CRUD
 
 //READ: no listId = my personal tasks, listId = that group list's tasks
-export async function getTasks(listId?: string): Promise<task[]> {
+export async function getTasks(listId?: string): Promise<Task[]> {
     const url = listId ? `${api_url}?list=${listId}` : api_url
     const res = await fetch(url, { credentials: "include" }) // send the session cookie
     if(!res.ok) throw new Error(await errorMessage(res, "Fetching tasks failed"))
@@ -33,7 +33,7 @@ export async function createTasks( data : {
     description?: string,
     completed?: boolean,
     list?: string,   // omit = personal task
-}): Promise<task> {
+}): Promise<Task> {
     const res = await fetch(api_url, {
         method: "POST",
         credentials: "include",
@@ -50,8 +50,8 @@ export async function createTasks( data : {
 //UPDATE
 export async function updateTask(
     id: string,
-    updates: Partial<task>    //Optional some of hte fileds
-): Promise<task> {
+    updates: Partial<Task>    //Optional some of hte fileds
+): Promise<Task> {
     const res = await fetch(`${api_url}/${id}`, {
         method: "PUT",
         credentials: "include",
@@ -79,7 +79,7 @@ export async function deleteTask(id: string): Promise<void> {
 }
 
 // Undo a soft delete
-export async function restoreTask(id: string): Promise<task> {
+export async function restoreTask(id: string): Promise<Task> {
     const res = await fetch(`${api_url}/${id}/restore`, {
         method: "PATCH",
         credentials: "include",

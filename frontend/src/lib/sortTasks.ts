@@ -1,11 +1,11 @@
-import type { task } from "@/types/task";
+import type { Task } from "shared";
 import { priorityRank } from "@/lib/priority";
 import { tagRank } from "@/lib/tags";
 
 export type SortBy = "added" | "due" | "priority" | "tag";
 
 // Returns a new sorted array; the input isn't mutated (sort() works in place, so copy first)
-export function sortTasks(tasks: task[], sortBy: SortBy): task[] {
+export function sortTasks(tasks: Task[], sortBy: SortBy): Task[] {
   return [...tasks].sort((a, b) => {
     switch (sortBy) {
       case "due":

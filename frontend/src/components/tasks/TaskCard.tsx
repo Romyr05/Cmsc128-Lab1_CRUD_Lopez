@@ -1,14 +1,14 @@
 import { CalendarClock } from "lucide-react";
-import type { task } from "@/types/task";
+import type { Task } from "shared";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { priorityCheckbox } from "@/lib/priority";
 import { tagLabel } from "@/lib/tags";
 
 type TaskCardProps = {
-  task: task;
-  onToggle: (t: task) => void;
-  onEdit: (t: task) => void;
+  task: Task;
+  onToggle: (t: Task) => void;
+  onEdit: (t: Task) => void;
   readOnly?: boolean;  // view-only list member: no editing (backend also enforces this)
 };
 
