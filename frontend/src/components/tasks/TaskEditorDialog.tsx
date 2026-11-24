@@ -4,6 +4,7 @@ import type { task, Tag } from "@/types/task";
 import { TAG_OPTIONS } from "@/lib/tags";
 import { PRIORITY_ORDER, priorityColor } from "@/lib/priority";
 import { taskFormSchema, type TaskFormValues } from "@/lib/taskForm";
+import { toLocalDateTime } from "@/lib/dateHelper";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -49,7 +50,7 @@ function toFormValues(t: task | null): TaskFormValues {
   return {
     title: t.title,
     description: t.description ?? "",
-    due_date: t.due_date ? t.due_date.slice(0, 16) : "",
+    due_date: t.due_date ? toLocalDateTime(new Date(t.due_date)) : "",
     priority: t.priority,
     tag: t.tag ?? "none",
     completed: t.completed,

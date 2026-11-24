@@ -19,7 +19,8 @@ export function toPayload(v: TaskFormValues) {
   return {
     title: v.title,
     description: v.description.trim(), // always send (empty string clears it)
-    due_date: v.due_date || undefined,
+    // local "YYYY-MM-DDTHH:mm" -> real UTC instant, so the server never guesses the timezone
+    due_date: v.due_date ? new Date(v.due_date).toISOString() : undefined,
     priority: v.priority,
     tag: v.tag === "none" ? undefined : v.tag,
     completed: v.completed,
