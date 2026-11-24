@@ -107,6 +107,51 @@ if (!task.list) {                       // personal task
 }
 ```
 
+### Exact attack requests
+
+The only authentication supplied is **Attacker's** session cookie. The task ID
+in the URL belongs to **Owner**. The runner obtains that ID from Owner's task
+creation response to simulate a known/leaked identifier; it does not claim to
+guess ObjectIds.
+
+```http
+PUT /api/tasks/<OWNER_TASK_ID>
+Cookie: connect.sid=<ATTACKER_SESSION>
+Content-Type: application/json
+
+{"title":"Hacked by another user"}
+```
+
+
+
+```bash
+
+curl -i -b attacker-cookies.txt -X PUT \
+  http://localhost:5000/api/tasks/OWNER_TASK_ID \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Hacked by another user"}'
+```
+
+The runner also attacks `DELETE /api/tasks/<OWNER_TASK_ID>` and
+`PATCH /api/tasks/<OWNER_TASK_ID>/restore`. Before the restore attempt, Owner
+deletes the task to establish a genuinely deleted target.
+
+### Safeguard and verification evidence
+
+The existing `findEditableTask()` helper in
+[`backend/src/controllers/task.controller.ts`](backend/src/controllers/task.controller.ts)
+checks the task against the **server-side session user** before any write:
+
+```ts
+if (!task.list) {
+    if (!task.owner.equals(me)) {
+        res.status(404).json({ message: "Task not Found" })
+        return null
+    }
+    return task
+}
+```
+
 ---
 
 ## Tech stack & why
