@@ -3,6 +3,7 @@ import type {
   RegisterValues,
   ForgotPasswordValues,
   UpdateProfileValues,
+  ChangePasswordValues,
 } from "shared";
 import { API_BASE, request } from "./client";
 
@@ -25,6 +26,11 @@ export function register(data: RegisterValues): Promise<User> {
 // AuthContext can refresh its state.
 export function updateProfile(data: UpdateProfileValues): Promise<User> {
   return request<User>("/auth/me", "Profile update failed", { method: "PATCH", body: data });
+}
+
+// Change the logged-in user's password (needs the current one).
+export async function changePassword(data: ChangePasswordValues): Promise<void> {
+  await request("/auth/change-password", "Password change failed", { method: "POST", body: data });
 }
 
 // Request a reset email. The backend always responds success (even for

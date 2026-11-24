@@ -84,6 +84,15 @@ function ProfilePage() {
           type="button"
           variant="outline"
           className="w-full"
+          onClick={() => navigate("/change-password")}
+        >
+          Change password
+        </Button>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
           onClick={() => navigate(-1)}
         >
           Go back
