@@ -16,6 +16,8 @@ const app = express()
 const sessionSecret = process.env.SESSION_SECRET
 if (!sessionSecret) throw new Error("SESSION_SECRET missing from .env")
 const port = process.env.PORT || 5000;
+// One lifetime for both the cookie and the DB session, so they can't drift apart
+const SESSION_DAYS = 14
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN || "http://localhost:5173",
@@ -28,10 +30,10 @@ app.use(session({
     saveUninitialized: false,
     store: MongoStore.create({
         client: mongoose.connection.getClient(),
-        ttl: 14 * 24 * 60 * 60, //14 days
+        ttl: SESSION_DAYS * 24 * 60 * 60, // seconds
     }),
     cookie: {
-        maxAge: 1000 *60 * 60 // 1 hour
+        maxAge: SESSION_DAYS * 24 * 60 * 60 * 1000 // milliseconds; same lifetime as the store
     },
 
 }))
