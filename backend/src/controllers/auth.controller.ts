@@ -10,6 +10,15 @@ function hashToken(raw: string): string {
     return crypto.createHash("sha256").update(raw).digest("hex");
 }
 
+// Give the user a brand-new session id on login/register (prevents session fixation:
+// an attacker can't plant a known session id before login and reuse it after).
+// regenerate() is callback-based, so wrap it in a Promise to use await.
+function regenerateSession(req: Request): Promise<void> {
+    return new Promise((resolve, reject) => {
+        req.session.regenerate((err) => (err ? reject(err) : resolve()))
+    })
+}
+
 export async function register(req:Request, res:Response): Promise<void> {
 
     const {email,name,password} = req.body
@@ -17,6 +26,7 @@ export async function register(req:Request, res:Response): Promise<void> {
         const passwordHash = await argon2.hash(password)
         const user = await userModel.create({email,name,passwordHash})
 
+        await regenerateSession(req)
         req.session.userId = user.id // log the new user in immediately
 
         res.status(201).json({id: user.id, email: user.email, name: user.name})
@@ -54,6 +64,7 @@ export async function login(req: Request, res:Response): Promise<void> {
         return
     }
 
+    await regenerateSession(req)
     req.session.userId = user.id
 
     res.status(200).json({id: user.id, email: user.email, name: user.name})
@@ -61,7 +72,8 @@ export async function login(req: Request, res:Response): Promise<void> {
 
         
     } catch (error) {
-        res.status(401).json({message:"Login failed"})
+        console.error("Login error", error)
+        res.status(500).json({message:"Login failed"}) // server problem, not bad credentials
     }
 
 }
