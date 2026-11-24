@@ -1,8 +1,8 @@
 import { Router } from "express";
 
-import { register, login, me, logout, forgotPassword, resetPassword, updateProfile } from "../controllers/auth.controller.js";
+import { register, login, me, logout, forgotPassword, resetPassword, updateProfile, changePassword } from "../controllers/auth.controller.js";
 import { validateBody } from "../middleware/validate.js";
-import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, updateProfileSchema } from "shared";
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, updateProfileSchema, changePasswordSchema } from "shared";
 import { checkAuth } from "../middleware/requireAuth.js";
 
 const router = Router()
@@ -13,6 +13,7 @@ router.post("/forgot-password", validateBody(forgotPasswordSchema), forgotPasswo
 router.post("/reset-password", validateBody(resetPasswordSchema), resetPassword)
 router.get("/me", me)
 router.patch("/me", checkAuth, validateBody(updateProfileSchema), updateProfile)
+router.post("/change-password", checkAuth, validateBody(changePasswordSchema), changePassword)
 router.post("/logout", checkAuth, logout)
 
 export default router

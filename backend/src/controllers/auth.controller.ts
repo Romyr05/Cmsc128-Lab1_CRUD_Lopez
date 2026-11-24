@@ -186,6 +186,44 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
 }
 
 
+// POST /api/auth/change-password
+// Logged-in user changes their password. Requires the current password so
+// someone using an unattended logged-in browser can't take over the account.
+export async function changePassword(req: Request, res: Response): Promise<void> {
+    const { currentPassword, newPassword } = req.body
+    try {
+        const user = await User.findById(req.session.userId)
+
+        if (!user) {
+            res.status(401).json({ message: "Not authenticated" })
+            return
+        }
+
+        const valid = await argon2.verify(user.passwordHash, currentPassword)
+        if (!valid) {
+            // 400, not 401: the user IS logged in, they just typed the wrong password
+            res.status(400).json({ message: "Current password is incorrect" })
+            return
+        }
+
+        user.passwordHash = await argon2.hash(newPassword)
+        // Kill any pending "forgot password" link so it can't undo this change
+        user.resetTokenHash = undefined
+        user.resetTokenExpires = undefined
+        await user.save()
+
+        // Fresh session id after a security change (same idea as on login)
+        await regenerateSession(req)
+        req.session.userId = user.id
+
+        res.status(200).json({ message: "Password updated" })
+    } catch (error) {
+        console.error("Change password error", error)
+        res.status(500).json({ message: "Password change failed" })
+    }
+}
+
+
 // POST /api/auth/logout
 // destroy the session and clear the cookie.
 export function logout(req: Request, res: Response): void {
