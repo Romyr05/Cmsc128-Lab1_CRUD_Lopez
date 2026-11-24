@@ -5,16 +5,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { register } from "@/api/auth";
 import { registerSchema } from "@/lib/authSchema";
 import { useAuth } from "@/context/AuthContext";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { AuthCard } from "@/components/shared/AuthCard";
+import { FormField } from "@/components/shared/FormField";
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -41,102 +34,76 @@ function RegisterPage() {
   });
 
   return (
-    <div className="flex min-h-svh items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Create an account</CardTitle>
-          <CardDescription>Enter your details to get started.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              form.handleSubmit();
-            }}
-            className="flex flex-col gap-4"
-          >
-            <form.Field name="name">
-              {(field) => (
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Display name</Label>
-                  <Input
-                    id="name"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-sm">
-                      {field.state.meta.errors.map((e) => e?.message).join(", ")}
-                    </p>
-                  )}
-                </div>
-              )}
-            </form.Field>
+    <AuthCard title="Create an account" description="Enter your details to get started.">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          form.handleSubmit();
+        }}
+        className="flex flex-col gap-4"
+      >
+        <form.Field name="name">
+          {(field) => (
+            <FormField
+              id="name"
+              label="Display name"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={field.handleChange}
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
 
-            <form.Field name="email">
-              {(field) => (
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-sm">
-                      {field.state.meta.errors.map((e) => e?.message).join(", ")}
-                    </p>
-                  )}
-                </div>
-              )}
-            </form.Field>
+        <form.Field name="email">
+          {(field) => (
+            <FormField
+              id="email"
+              label="Email"
+              type="email"
+              placeholder="you@example.com"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={field.handleChange}
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
 
-            <form.Field name="password">
-              {(field) => (
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-sm">
-                      {field.state.meta.errors.map((e) => e?.message).join(", ")}
-                    </p>
-                  )}
-                </div>
-              )}
-            </form.Field>
+        <form.Field name="password">
+          {(field) => (
+            <FormField
+              id="password"
+              label="Password"
+              type="password"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={field.handleChange}
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
 
-            {formError && <p className="text-destructive text-sm">{formError}</p>}
+        {formError && <p className="text-destructive text-sm">{formError}</p>}
 
-            <form.Subscribe
-              selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
-            >
-              {({ canSubmit, isSubmitting }) => (
-                <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
-                  {isSubmitting ? "Creating account…" : "Create account"}
-                </Button>
-              )}
-            </form.Subscribe>
-          </form>
+        <form.Subscribe
+          selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
+        >
+          {({ canSubmit, isSubmitting }) => (
+            <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
+              {isSubmitting ? "Creating account…" : "Create account"}
+            </Button>
+          )}
+        </form.Subscribe>
+      </form>
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link to="/login" className="text-primary underline-offset-4 hover:underline">
-              Login
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+      <p className="mt-4 text-center text-sm text-muted-foreground">
+        Already have an account?{" "}
+        <Link to="/login" className="text-primary underline-offset-4 hover:underline">
+          Login
+        </Link>
+      </p>
+    </AuthCard>
   );
 }
 

@@ -4,16 +4,9 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { forgotPassword } from "@/api/auth";
 import { forgotPasswordSchema } from "@/lib/authSchema";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { AuthCard } from "@/components/shared/AuthCard";
+import { FormField } from "@/components/shared/FormField";
 
 function ForgotPasswordPage() {
   const [formError, setFormError] = useState<string | null>(null);
@@ -35,70 +28,57 @@ function ForgotPasswordPage() {
   });
 
   return (
-    <div className="flex min-h-svh items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Forgot password</CardTitle>
-          <CardDescription>
-            Enter your email and we'll send you reset instructions.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              form.handleSubmit();
-            }}
-            className="flex flex-col gap-4"
-          >
-            <form.Field name="email">
-              {(field) => (
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-sm">
-                      {field.state.meta.errors.map((e) => e?.message).join(", ")}
-                    </p>
-                  )}
-                </div>
-              )}
-            </form.Field>
+    <AuthCard
+      title="Forgot password"
+      description="Enter your email and we'll send you reset instructions."
+    >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          form.handleSubmit();
+        }}
+        className="flex flex-col gap-4"
+      >
+        <form.Field name="email">
+          {(field) => (
+            <FormField
+              id="email"
+              label="Email"
+              type="email"
+              placeholder="you@example.com"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={field.handleChange}
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
 
-            {formError && <p className="text-destructive text-sm">{formError}</p>}
-            {sent && (
-              <p className="text-sm text-muted-foreground">
-                Check your email for a reset link. It expires in 1 hour.
-              </p>
-            )}
-
-            <form.Subscribe
-              selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
-            >
-              {({ canSubmit, isSubmitting }) => (
-                <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
-                  {isSubmitting ? "Sending…" : "Send reset link"}
-                </Button>
-              )}
-            </form.Subscribe>
-          </form>
-
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Remembered it?{" "}
-            <Link to="/login" className="text-primary underline-offset-4 hover:underline">
-              Login
-            </Link>
+        {formError && <p className="text-destructive text-sm">{formError}</p>}
+        {sent && (
+          <p className="text-sm text-muted-foreground">
+            Check your email for a reset link. It expires in 1 hour.
           </p>
-        </CardContent>
-      </Card>
-    </div>
+        )}
+
+        <form.Subscribe
+          selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
+        >
+          {({ canSubmit, isSubmitting }) => (
+            <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
+              {isSubmitting ? "Sending…" : "Send reset link"}
+            </Button>
+          )}
+        </form.Subscribe>
+      </form>
+
+      <p className="mt-4 text-center text-sm text-muted-foreground">
+        Remembered it?{" "}
+        <Link to="/login" className="text-primary underline-offset-4 hover:underline">
+          Login
+        </Link>
+      </p>
+    </AuthCard>
   );
 }
 

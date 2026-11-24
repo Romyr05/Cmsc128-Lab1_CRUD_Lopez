@@ -5,16 +5,9 @@ import { toast } from "sonner";
 import { updateProfile } from "@/api/auth";
 import { updateProfileSchema } from "@/lib/authSchema";
 import { useAuth } from "@/context/AuthContext";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { AuthCard } from "@/components/shared/AuthCard";
+import { FormField } from "@/components/shared/FormField";
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -39,84 +32,64 @@ function ProfilePage() {
   });
 
   return (
-    <div className="flex min-h-svh items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Update your account details.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              form.handleSubmit();
-            }}
-            className="flex flex-col gap-4"
-          >
-            <form.Field name="name">
-              {(field) => (
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Display name</Label>
-                  <Input
-                    id="name"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-sm">
-                      {field.state.meta.errors.map((e) => e?.message).join(", ")}
-                    </p>
-                  )}
-                </div>
-              )}
-            </form.Field>
+    <AuthCard title="Profile" description="Update your account details.">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          form.handleSubmit();
+        }}
+        className="flex flex-col gap-4"
+      >
+        <form.Field name="name">
+          {(field) => (
+            <FormField
+              id="name"
+              label="Display name"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={field.handleChange}
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
 
-            <form.Field name="email">
-              {(field) => (
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-sm">
-                      {field.state.meta.errors.map((e) => e?.message).join(", ")}
-                    </p>
-                  )}
-                </div>
-              )}
-            </form.Field>
+        <form.Field name="email">
+          {(field) => (
+            <FormField
+              id="email"
+              label="Email"
+              type="email"
+              placeholder="you@example.com"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={field.handleChange}
+              errors={field.state.meta.errors}
+            />
+          )}
+        </form.Field>
 
-            {formError && <p className="text-destructive text-sm">{formError}</p>}
+        {formError && <p className="text-destructive text-sm">{formError}</p>}
 
-            <form.Subscribe
-              selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
-            >
-              {({ canSubmit, isSubmitting }) => (
-                <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
-                  {isSubmitting ? "Saving…" : "Save changes"}
-                </Button>
-              )}
-            </form.Subscribe>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => navigate(-1)}
-            >
-              Go back
+        <form.Subscribe
+          selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
+        >
+          {({ canSubmit, isSubmitting }) => (
+            <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
+              {isSubmitting ? "Saving…" : "Save changes"}
             </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          )}
+        </form.Subscribe>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => navigate(-1)}
+        >
+          Go back
+        </Button>
+      </form>
+    </AuthCard>
   );
 }
 
