@@ -1,91 +1,38 @@
 import type { Task, Priority, Tag } from "shared";
-
-
-const api_url = import.meta.env.VITE_API_URL
-
-// Pull the backend's { message } out of an error response so toasts can show it
-// (e.g. "Due date can't be in the past", "You only have view access to this list").
-async function errorMessage(res: Response, fallback: string): Promise<string> {
-  try {
-    const body = await res.json();
-    return body?.message ?? fallback;
-  } catch {
-    return fallback;
-  }
-}
+import { request } from "./client";
 
 //CRUD
 
 //READ: no listId = my personal tasks, listId = that group list's tasks
-export async function getTasks(listId?: string): Promise<Task[]> {
-    const url = listId ? `${api_url}?list=${listId}` : api_url
-    const res = await fetch(url, { credentials: "include" }) // send the session cookie
-    if(!res.ok) throw new Error(await errorMessage(res, "Fetching tasks failed"))
-    return res.json()
+export function getTasks(listId?: string): Promise<Task[]> {
+  const query = listId ? `?list=${listId}` : "";
+  return request<Task[]>(`/tasks${query}`, "Fetching tasks failed");
 }
 
 //CREATE
-export async function createTasks( data : {
-    title: string,
-    priority: Priority,
-    due_date?: string,
-    tag?: Tag,
-    description?: string,
-    completed?: boolean,
-    list?: string,   // omit = personal task
+export function createTasks(data: {
+  title: string;
+  priority: Priority;
+  due_date?: string;
+  tag?: Tag;
+  description?: string;
+  completed?: boolean;
+  list?: string; // omit = personal task
 }): Promise<Task> {
-    const res = await fetch(api_url, {
-        method: "POST",
-        credentials: "include",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(data)
-    })
-
-    if (!res.ok){
-        throw new Error(await errorMessage(res, "Creating Task Failed"))
-    } 
-    return res.json()
+  return request<Task>("/tasks", "Creating Task Failed", { method: "POST", body: data });
 }
 
-//UPDATE
-export async function updateTask(
-    id: string,
-    updates: Partial<Task>    //Optional some of hte fileds
-): Promise<Task> {
-    const res = await fetch(`${api_url}/${id}`, {
-        method: "PUT",
-        credentials: "include",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(updates)
-    })
-    if (!res.ok){
-        throw new Error(await errorMessage(res, "Failed Update Task"))
-    }
-    return res.json()
+//UPDATE: updates = only the fields that change
+export function updateTask(id: string, updates: Partial<Task>): Promise<Task> {
+  return request<Task>(`/tasks/${id}`, "Failed Update Task", { method: "PUT", body: updates });
 }
 
-
-//Delete
+//DELETE (soft delete on the backend)
 export async function deleteTask(id: string): Promise<void> {
-    const res = await fetch(`${api_url}/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-    })
-    if (!res.ok){
-        throw new Error(await errorMessage(res, "Delete task failed"))
-    }
+  await request(`/tasks/${id}`, "Delete task failed", { method: "DELETE" });
 }
 
 // Undo a soft delete
-export async function restoreTask(id: string): Promise<Task> {
-    const res = await fetch(`${api_url}/${id}/restore`, {
-        method: "PATCH",
-        credentials: "include",
-    })
-    if (!res.ok){
-        throw new Error(await errorMessage(res, "Restore task failed"))
-    }
-    return res.json()
+export function restoreTask(id: string): Promise<Task> {
+  return request<Task>(`/tasks/${id}/restore`, "Restore task failed", { method: "PATCH" });
 }
