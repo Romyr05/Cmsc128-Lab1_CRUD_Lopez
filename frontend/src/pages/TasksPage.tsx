@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import type { Task, Priority, Tag } from "shared";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useTasks } from "@/hooks/useTasks";
 import { useLists } from "@/hooks/useLists";
@@ -16,6 +14,8 @@ import { sortTasks, type SortBy } from "@/lib/sortTasks";
 import { TaskList } from "@/components/tasks/TaskList";
 import { TaskEditorDialog } from "@/components/tasks/TaskEditorDialog";
 import { MembersDialog } from "@/components/tasks/MembersDialog";
+import { TaskChat } from "@/components/tasks/TaskChat";
+import type { ParsedTask } from "@/lib/parseTaskInput";
 
 
 function TasksPage() {
@@ -78,9 +78,20 @@ function TasksPage() {
   const [filterTag, setFilterTag] = useState<Tag | "all">("all");
   const [filterPriority, setFilterPriority] = useState<Priority | "all">("all");
 
-  function openAdd() {
-    setEditing(null);
-    setOpen(true);
+  // Save a task from the quick-add input; rethrow so it keeps the text
+  async function handleChatSend(parsed: ParsedTask): Promise<void> {
+    try {
+      await addTask({
+        title: parsed.title,
+        priority: parsed.priority ?? "medium",
+        tag: parsed.tag,
+        due_date: parsed.due_date?.toISOString(), // UTC, like toPayload
+      });
+      toast.success("Task added");
+    } catch (error) {
+      toast.error((error as Error).message);
+      throw error;
+    }
   }
 
   function openEdit(t: Task) {
@@ -141,6 +152,11 @@ function TasksPage() {
         onOpenMembers={() => setMembersOpen(true)}
       />
 
+      {/*Add a task by typing it (hidden for view-only members)*/}
+      {!readOnly && (
+        <TaskChat listName={activeList?.name ?? "To Do List"} onSend={handleChatSend} />
+      )}
+
       <SortFilterBar
         sortBy={sortBy}
         onSortByChange={setSortBy}
@@ -160,17 +176,6 @@ function TasksPage() {
         onDelete={(t) => deleteWithUndo(t._id)}
         readOnly={readOnly}
       />
-
-      {/*Add button Floating (hidden for view-only members)*/}
-      {!readOnly && (
-        <Button
-          onClick={openAdd}
-          aria-label="Add task"
-          className="fixed bottom-6 right-6 size-14 rounded-full shadow-lg"
-        >
-          <Plus className="size-6" />
-        </Button>
-      )}
 
       {activeList?.myRole === "owner" && (
         <MembersDialog list={activeList} open={membersOpen} onOpenChange={setMembersOpen} />
