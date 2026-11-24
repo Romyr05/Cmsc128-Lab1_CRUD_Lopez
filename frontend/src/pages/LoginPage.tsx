@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "@tanstack/react-form";
+import { revalidateLogic, useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "@/api/auth";
@@ -17,7 +17,9 @@ function LoginPage() {
 
   const form = useForm({
     defaultValues: { email: "", password: "" },
-    validators: { onChange: loginSchema },
+    // Validate only when Login is clicked; after that, re-check as the user types
+    validationLogic: revalidateLogic(),
+    validators: { onDynamic: loginSchema },
     onSubmit: async ({ value }) => {
       setFormError(null);
       try {
