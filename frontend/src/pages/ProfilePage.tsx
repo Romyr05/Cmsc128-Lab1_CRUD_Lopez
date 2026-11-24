@@ -74,8 +74,9 @@ function ProfilePage() {
           selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
         >
           {({ canSubmit, isSubmitting }) => (
-            <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
+            <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting} onClick={() => navigate("/")}>
               {isSubmitting ? "Saving…" : "Save changes"}
+              
             </Button>
           )}
         </form.Subscribe>
@@ -93,7 +94,7 @@ function ProfilePage() {
           type="button"
           variant="outline"
           className="w-full"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
         >
           Go back
         </Button>
