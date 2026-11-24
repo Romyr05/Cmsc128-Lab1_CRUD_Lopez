@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { isValidObjectId } from "mongoose";
-import { Role_Enum } from "./list.schema.js";
+import { Role_Enum } from "../models/List.js";
 
-// Request validation for /api/lists (the Mongoose shape lives in list.schema.ts)
+// Request validation for /api/lists (the Mongoose shape lives in models/List.ts)
 
 const objectId = (label: string) =>
   z.string().refine(isValidObjectId, { message: `Invalid ${label}` });

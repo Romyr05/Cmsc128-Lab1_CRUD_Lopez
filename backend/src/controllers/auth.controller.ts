@@ -1,4 +1,4 @@
-import userModel from "../models/userModel.js"
+import User from "../models/User.js"
 import { Request, Response } from "express";
 import argon2 from "argon2";
 import crypto from "crypto";
@@ -24,7 +24,7 @@ export async function register(req:Request, res:Response): Promise<void> {
     const {email,name,password} = req.body
     try {
         const passwordHash = await argon2.hash(password)
-        const user = await userModel.create({email,name,passwordHash})
+        const user = await User.create({email,name,passwordHash})
 
         await regenerateSession(req)
         req.session.userId = user.id // log the new user in immediately
@@ -49,7 +49,7 @@ export async function login(req: Request, res:Response): Promise<void> {
 
     try {
     //find user email
-    const user = await userModel.findOne({email})
+    const user = await User.findOne({email})
 
     if(!user){
         res.status(401).json({message: "Invalid Credentials"});
@@ -86,7 +86,7 @@ export async function login(req: Request, res:Response): Promise<void> {
 export async function forgotPassword(req: Request, res: Response): Promise<void> {
     const { email } = req.body
     try {
-        const user = await userModel.findOne({ email })
+        const user = await User.findOne({ email })
 
         if (user) {
             const rawToken = crypto.randomBytes(32).toString("hex")
@@ -112,7 +112,7 @@ export async function forgotPassword(req: Request, res: Response): Promise<void>
 export async function resetPassword(req: Request, res: Response): Promise<void> {
     const { token, password } = req.body
     try {
-        const user = await userModel.findOne({
+        const user = await User.findOne({
             resetTokenHash: hashToken(token),
             resetTokenExpires: { $gt: new Date() },
         })
@@ -140,7 +140,7 @@ export async function resetPassword(req: Request, res: Response): Promise<void> 
 // its auth state from the session cookie after a refresh.
 export async function me(req: Request, res: Response): Promise<void> {
     try {
-        const user = await userModel.findById(req.session.userId)
+        const user = await User.findById(req.session.userId)
 
         if (!user) {
             res.status(401).json({ message: "Not authenticated" })
@@ -162,7 +162,7 @@ export async function me(req: Request, res: Response): Promise<void> {
 export async function updateProfile(req: Request, res: Response): Promise<void> {
     const { name, email } = req.body
     try {
-        const user = await userModel.findById(req.session.userId)
+        const user = await User.findById(req.session.userId)
 
         if (!user) {
             res.status(401).json({ message: "Not authenticated" })

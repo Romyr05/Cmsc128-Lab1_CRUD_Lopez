@@ -20,6 +20,6 @@ export const userSchema = new Schema<interUser>({
     resetTokenExpires: {type: Date}       // when the token stops working
 },{timestamps: true})
 
+const User = mongoose.model<interUser>("User", userSchema)
 
-
-export default userSchema
+export default User

@@ -1,5 +1,4 @@
- import List from "../models/List.js";
-import { Role_Enum } from "../schemas/list.schema.js";
+import List, { Role_Enum } from "../models/List.js";
 
 export type ListRole = "owner" | Role_Enum | null
 

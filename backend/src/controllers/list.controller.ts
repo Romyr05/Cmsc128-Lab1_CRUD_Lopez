@@ -2,9 +2,8 @@
 
 import { Request, Response } from "express";
 import { Types } from "mongoose";
-import List from "../models/List.js";
-import userModel from "../models/userModel.js";
-import { Role_Enum } from "../schemas/list.schema.js";
+import List, { Role_Enum } from "../models/List.js";
+import User from "../models/User.js";
 import { getListRole } from "../utils/listAccess.js";
 
 // Shape of a user after populate("...", "name email") — never includes passwordHash
@@ -68,7 +67,7 @@ export async function addMember(req: Request, res: Response): Promise<void> {
         if (!(await requireOwner(req, res))) return
 
         const { email, role } = req.body
-        const user = await userModel.findOne({ email })
+        const user = await User.findOne({ email })
         if (!user) {
             res.status(404).json({ message: "No user with that email" })
             return
