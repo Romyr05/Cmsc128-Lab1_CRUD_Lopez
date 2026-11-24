@@ -1,6 +1,12 @@
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, Trash2 } from "lucide-react";
 import type { Task } from "shared";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { priorityCheckbox } from "@/lib/priority";
 import { tagLabel } from "@/lib/tags";
@@ -9,57 +15,68 @@ type TaskCardProps = {
   task: Task;
   onToggle: (t: Task) => void;
   onEdit: (t: Task) => void;
+  onDelete: (t: Task) => void; // from the right-click menu
   readOnly?: boolean;  // view-only list member: no editing (backend also enforces this)
 };
 
-export function TaskCard({ task, onToggle, onEdit, readOnly = false }: TaskCardProps) {
+export function TaskCard({ task, onToggle, onEdit, onDelete, readOnly = false }: TaskCardProps) {
   return (
-    <Card
-      onClick={readOnly ? undefined : () => onEdit(task)}
-      className={readOnly ? "" : "cursor-pointer transition-colors hover:bg-accent/40"}
-    >
-      <CardContent className="flex items-start gap-3 p-4">
-        {/* Stop unwanted Propagation, not click the onEdit (Go up the Parent) */}
-        <span onClick={(e) => e.stopPropagation()}>
-          <Checkbox
-            checked={task.completed}
-            disabled={readOnly}
-            onCheckedChange={() => onToggle(task)}
-            className={priorityCheckbox[task.priority]}
-          />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p
-            className={
-              task.completed
-                ? "truncate line-through text-muted-foreground"
-                : "truncate font-medium"
-            }
-          >
-            {task.title}
-          </p>
+    // Right-click (or long-press / Menu key) opens Delete; off for view-only members
+    <ContextMenu disabled={readOnly}>
+      <ContextMenuTrigger>
+        <Card
+          onClick={readOnly ? undefined : () => onEdit(task)}
+          className={readOnly ? "" : "cursor-pointer transition-colors hover:bg-accent/40"}
+        >
+          <CardContent className="flex items-start gap-3 p-4">
+            {/* Stop unwanted Propagation, not click the onEdit (Go up the Parent) */}
+            <span onClick={(e) => e.stopPropagation()}>
+              <Checkbox
+                checked={task.completed}
+                disabled={readOnly}
+                onCheckedChange={() => onToggle(task)}
+                className={priorityCheckbox[task.priority]}
+              />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p
+                className={
+                  task.completed
+                    ? "truncate line-through text-muted-foreground"
+                    : "truncate font-medium"
+                }
+              >
+                {task.title}
+              </p>
 
-          {task.description && (
-            <p className="mt-0.5 truncate text-sm text-muted-foreground">
-              {task.description}
-            </p>
-          )}
+              {task.description && (
+                <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                  {task.description}
+                </p>
+              )}
 
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            {task.tag && (
-              <span className="rounded bg-muted px-1.5 py-0.5">
-                {tagLabel[task.tag]}
-              </span>
-            )}
-            {task.due_date && (
-              <span className="flex items-center gap-1">
-                <CalendarClock className="size-3" />
-                {new Date(task.due_date).toLocaleString()}
-              </span>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                {task.tag && (
+                  <span className="rounded bg-muted px-1.5 py-0.5">
+                    {tagLabel[task.tag]}
+                  </span>
+                )}
+                {task.due_date && (
+                  <span className="flex items-center gap-1">
+                    <CalendarClock className="size-3" />
+                    {new Date(task.due_date).toLocaleString()}
+                  </span>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem variant="destructive" onClick={() => onDelete(task)}>
+          <Trash2 /> Delete
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }

@@ -88,11 +88,15 @@ function TasksPage() {
     setOpen(true);
   }
 
+  // Editor dialog's Delete button
   async function handleDelete() {
     if (!editing) return;
-    const deletedId = editing._id;
     setOpen(false);
+    await deleteWithUndo(editing._id);
+  }
 
+  // Shared by the editor's Delete and the task card's right-click menu
+  async function deleteWithUndo(deletedId: string) {
     try {
       await removeTask(deletedId); // soft-delete in the DB immediately
     } catch (error) {
@@ -153,6 +157,7 @@ function TasksPage() {
         isError={isError}
         onToggle={handleToggle}
         onEdit={openEdit}
+        onDelete={(t) => deleteWithUndo(t._id)}
         readOnly={readOnly}
       />
 

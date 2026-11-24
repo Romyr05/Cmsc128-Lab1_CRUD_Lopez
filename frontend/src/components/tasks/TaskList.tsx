@@ -7,11 +7,12 @@ type TaskListProps = {
   isError: boolean;
   onToggle: (t: Task) => void;
   onEdit: (t: Task) => void;
+  onDelete: (t: Task) => void;
   readOnly: boolean;
 };
 
 // Task cards, or a loading / error message
-export function TaskList({ tasks, isLoading, isError, onToggle, onEdit, readOnly }: TaskListProps) {
+export function TaskList({ tasks, isLoading, isError, onToggle, onEdit, onDelete, readOnly }: TaskListProps) {
   return (
     <div className="flex flex-col gap-2">
       {isLoading ? (
@@ -20,7 +21,14 @@ export function TaskList({ tasks, isLoading, isError, onToggle, onEdit, readOnly
         <p className="text-destructive text-sm">Failed to load tasks.</p>
       ) : (
         tasks.map((t) => (
-          <TaskCard key={t._id} task={t} onToggle={onToggle} onEdit={onEdit} readOnly={readOnly} />
+          <TaskCard
+            key={t._id}
+            task={t}
+            onToggle={onToggle}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            readOnly={readOnly}
+          />
         ))
       )}
     </div>
