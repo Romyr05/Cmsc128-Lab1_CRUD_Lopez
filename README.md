@@ -29,7 +29,7 @@ reset link** (nodemailer over Gmail SMTP).
   lists. Each user can own one group list, add other users to it by email with a
   `view` or `edit` role, and sees only the lists they own or were added to.
 
-> See `AUTH_FEATURE.md` for the full auth architecture and how the files link.
+> See [`docs/AUTH_FEATURE.md`](docs/AUTH_FEATURE.md) for the full auth architecture and how the files link.
 
 ---
 
