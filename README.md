@@ -186,9 +186,7 @@ pnpm dev          # tsx watch → http://localhost:5000
 
 ```bash
 # create frontend/.env :
-#   VITE_API_URL=http://localhost:5000/api/tasks
-#   VITE_AUTH_URL=http://localhost:5000/api/auth
-#   VITE_LISTS_URL=http://localhost:5000/api/lists   (optional, this is the default)
+#   VITE_API_BASE=http://localhost:5000/api   (optional, this is the default)
 
 cd frontend
 pnpm dev          # vite → http://localhost:5173
@@ -207,9 +205,7 @@ Open **http://localhost:5173** — with no session you land on `/login`.
 | `backend/.env` | `SMTP_HOST` / `SMTP_PORT` | `smtp.gmail.com` / `587` |
 | `backend/.env` | `SMTP_USER` / `SMTP_PASS` | your Gmail / 16-char App Password |
 | `backend/.env` | `FRONTEND_URL` | `http://localhost:5173` (builds the reset link) |
-| `frontend/.env` | `VITE_API_URL` | `http://localhost:5000/api/tasks` |
-| `frontend/.env` | `VITE_AUTH_URL` | `http://localhost:5000/api/auth` |
-| `frontend/.env` | `VITE_LISTS_URL` | `http://localhost:5000/api/lists` (optional, this is the default) |
+| `frontend/.env` | `VITE_API_BASE` | `http://localhost:5000/api` (optional, this is the default) |
 
 > If `SMTP_USER`/`SMTP_PASS` are left empty, the reset email isn't sent — instead
 > the backend **logs the reset link to the console**, which is handy in dev.
@@ -327,13 +323,11 @@ backend/src/
   server.ts                  app entry (CORS, session, routes)
   config/db.ts               MongoDB connection
   config/mailer.ts           nodemailer transport + sendResetEmail
-  schemas/task.schema.ts     Mongoose schema + enums (owner + list refs)
-  schemas/user.schema.ts     user model fields (+ reset token hash/expiry)
-  schemas/list.schema.ts     Mongoose list schema (owner + members/roles)
-  schemas/auth.schema.ts     Zod request validation (register/login/reset)
   schemas/listInput.schema.ts  Zod request validation for /api/lists
-  models/Task.ts             Mongoose model
-  models/List.ts             Mongoose model
+  schemas/taskIdSchema.ts    Zod :id param validation
+  models/Task.ts             task schema + enums + model (owner + list refs)
+  models/List.ts             list schema (owner + members/roles) + model
+  models/User.ts             user schema (+ reset token hash/expiry) + model
   controllers/task.controller.ts  task handlers (CRUD + restore) with ownership checks
   controllers/list.controller.ts  list handlers (my lists, create, owner-only members)
   controllers/auth.controller.ts  auth handlers (register/login/me/logout/reset)
@@ -343,6 +337,10 @@ backend/src/
   routes/list.routes.ts      list REST routes
   routes/auth.routes.ts      auth routes
 
+shared/src/
+  task.schema.ts             Zod task schemas + Task/Priority/Tag types (both sides)
+  auth.schema.ts             Zod auth schemas (both sides)
+
 frontend/src/
   pages/TasksPage.tsx        main screen (list, editor, sort/filter, greeting + logout)
   pages/LoginPage.tsx        login form
@@ -351,18 +349,18 @@ frontend/src/
   pages/ResetPasswordPage.tsx   set a new password (reads ?token=)
   pages/ProfilePage.tsx      view name/email
   context/AuthContext.tsx    auth state + session restore
-  components/ProtectedRoute.tsx  redirects to /login when logged out
-  components/TaskCard.tsx     one task row
-  components/MembersDialog.tsx  owner adds/removes members, changes roles
+  components/shared/         used by several pages (ProtectedRoute, AuthCard, FormField)
+  components/tasks/          TasksPage sections (header, list switcher, sort/filter,
+                             task list + card, editor dialog, members dialog, date picker)
   components/ui/*             shadcn components
   hooks/useTasks.ts          tasks state + all DB operations
   hooks/useLists.ts          my lists + create group list
+  api/client.ts              request(): base URL + session cookie + backend error messages
   api/tasks.ts               task fetch calls
   api/lists.ts               list fetch calls
   api/auth.ts                auth fetch calls (credentials: include)
-  lib/authSchema.ts          Zod form schemas (shared rules with backend)
-  types/                     shared TypeScript types
-  lib/                       helpers (dates, tags, priority)
+  types/list.ts              group list types (task types come from shared/)
+  lib/                       helpers (dates, tags, priority, task form, sorting)
 ```
 
 

@@ -51,9 +51,9 @@ keeps you logged in across refreshes/restarts.
 | `frontend/src/main.tsx` | Provider order: `BrowserRouter` → `AuthProvider` → `App` |
 | `frontend/src/App.tsx` | Route table; wraps `/` and `/profile` in `ProtectedRoute` |
 | `frontend/src/context/AuthContext.tsx` | Holds `user`; restores session via `getMe()` on load; `signOut()` |
-| `frontend/src/components/ProtectedRoute.tsx` | Redirects to `/login` when there's no user |
+| `frontend/src/components/shared/ProtectedRoute.tsx` | Redirects to `/login` when there's no user |
 | `frontend/src/api/auth.ts` | `login` / `register` / `getMe` / `logout` fetchers (all `credentials:"include"`) |
-| `frontend/src/lib/authSchema.ts` | zod `loginSchema` / `registerSchema` (mirror the backend) |
+| `shared/src/auth.schema.ts` | zod `loginSchema` / `registerSchema` (same schemas the backend uses) |
 | `frontend/src/components/ui/input.tsx` | Input primitive (added for the forms) |
 | `frontend/src/components/ui/label.tsx` | Label primitive (added for the forms) |
 
@@ -64,14 +64,14 @@ keeps you logged in across refreshes/restarts.
 | `backend/src/controllers/auth.controller.ts` | argon2 hashing, session create/destroy, `me`, `forgotPassword`, `resetPassword` |
 | `backend/src/config/mailer.ts` | nodemailer SMTP transport + `sendResetEmail` (logs link if SMTP unset) |
 | `backend/src/middleware/requireAuth.ts` | `checkAuth` — 401 if no session (guards `/logout`) |
-| `backend/src/schemas/auth.schema.ts` | zod validation for register/login bodies |
-| `backend/src/models/userModel.ts` | Mongoose User model |
+| `shared/src/auth.schema.ts` | zod validation for register/login bodies (shared with the frontend) |
+| `backend/src/models/User.ts` | Mongoose User schema + model |
 | `backend/src/server.ts` | CORS (origin + `credentials:true`), `express-session`, route mounting |
 
 ### Config
 | File | Key | Value |
 |------|-----|-------|
-| `frontend/.env` | `VITE_AUTH_URL` | `http://localhost:5000/api/auth` |
+| `frontend/.env` | `VITE_API_BASE` | `http://localhost:5000/api` |
 | `backend/.env` | `CORS_ORIGIN` | `http://localhost:5173` |
 | `backend/.env` | `MONGO_URI` | `mongodb://localhost:27018/todoapp` |
 | `backend/.env` | `SMTP_HOST` / `SMTP_PORT` | `smtp.gmail.com` / `587` |
