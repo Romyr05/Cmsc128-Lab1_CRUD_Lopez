@@ -71,6 +71,7 @@ export async function getTasks(req: Request, res:Response): Promise<void> {
         const tasks = await Task.find({ list: listId, deletedAt: null }).sort({ createdAt: -1})
         res.json(tasks)
     } catch (error) {
+        console.error("Get tasks error:", error)
         res.status(500).json({ message: "Fetching failed"})
     }
 }
@@ -128,6 +129,7 @@ export async function updateTask(req: Request, res:Response): Promise<void> {
         res.json(task)
 
     } catch (error) {
+        console.error("Update task error:", error)
         res.status(400).json({message : "update failed"})
     }
 }
@@ -142,6 +144,7 @@ export async function deleteTask(req: Request, res: Response): Promise<void> {
         await task.save()
         res.json(task)
     } catch (error) {
+        console.error("Delete task error:", error)
         res.status(500).json({message: "Delete task Failed"})
     }
 }
@@ -156,6 +159,7 @@ export async function restoreTask(req: Request, res: Response): Promise<void> {
         await task.save()
         res.json(task)
     } catch (error) {
+        console.error("Restore task error:", error)
         res.status(500).json({message: "Restore task Failed"})
     }
 }
