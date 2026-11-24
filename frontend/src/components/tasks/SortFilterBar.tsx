@@ -1,5 +1,6 @@
 import type { Priority, Tag } from "@/types/task";
 import { TAG_OPTIONS } from "@/lib/tags";
+import type { SortBy } from "@/lib/sortTasks";
 import {
   Select,
   SelectContent,
@@ -7,8 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-export type SortBy = "added" | "due" | "priority" | "tag";
 
 type SortFilterBarProps = {
   sortBy: SortBy;

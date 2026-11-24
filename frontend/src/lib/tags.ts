@@ -10,3 +10,8 @@ export const TAG_OPTIONS: { value: Tag; label: string }[] = [
 export const tagLabel = Object.fromEntries(
   TAG_OPTIONS.map((o) => [o.value, o.label]),
 ) as Record<Tag, string>;
+
+// Sort order for "sort by tag" = position in TAG_OPTIONS, so it can't drift out of sync
+export const tagRank = Object.fromEntries(
+  TAG_OPTIONS.map((o, i) => [o.value, i]),
+) as Record<Tag, number>;

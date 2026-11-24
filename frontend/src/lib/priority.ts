@@ -3,6 +3,9 @@ import type { Priority } from "@/types/task";
 //Priority Order Least to Highest
 export const PRIORITY_ORDER: Priority[] = ["low", "medium", "high"];
 
+// Sort order for "sort by priority": high first
+export const priorityRank: Record<Priority, number> = { high: 0, medium: 1, low: 2 };
+
 // Extends an are all strings (Record)
 export const priorityColor: Record<Priority, string> = {
   low: "text-muted-foreground",
