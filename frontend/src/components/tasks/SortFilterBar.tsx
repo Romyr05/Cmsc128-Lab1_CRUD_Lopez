@@ -1,6 +1,7 @@
 import type { Priority, Tag } from "shared";
 import { TAG_OPTIONS } from "@/lib/tags";
 import type { SortBy } from "@/lib/sortTasks";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -18,7 +19,7 @@ type SortFilterBarProps = {
   onFilterPriorityChange: (v: Priority | "all") => void;
 };
 
-// sort & filter toolbar: sort on the left, filters on the right
+// sort & filter toolbar: 3 equal columns (label on top), one row on phones too
 export function SortFilterBar({
   sortBy,
   onSortByChange,
@@ -28,11 +29,13 @@ export function SortFilterBar({
   onFilterPriorityChange,
 }: SortFilterBarProps) {
   return (
-    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-muted-foreground">Sort By:</span>
+    <div className="mb-3 flex flex-wrap gap-2">
+      <div className="flex grow basis-24 flex-col gap-1">
+        <Label htmlFor="sort-by" className="text-xs text-muted-foreground">
+          Sort by
+        </Label>
         <Select value={sortBy} onValueChange={(v) => onSortByChange(v as SortBy)}>
-          <SelectTrigger className="w-auto">
+          <SelectTrigger id="sort-by" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -44,14 +47,16 @@ export function SortFilterBar({
         </Select>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-medium text-muted-foreground">Filter By:</span>
+      <div className="flex grow basis-24 flex-col gap-1">
+        <Label htmlFor="filter-tag" className="text-xs text-muted-foreground">
+          Tag
+        </Label>
         <Select value={filterTag} onValueChange={(v) => onFilterTagChange(v as Tag | "all")}>
-          <SelectTrigger className="w-auto">
+          <SelectTrigger id="filter-tag" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All tags</SelectItem>
+            <SelectItem value="all">All</SelectItem>
             {TAG_OPTIONS.map((t) => (
               <SelectItem key={t.value} value={t.value}>
                 {t.label}
@@ -59,16 +64,21 @@ export function SortFilterBar({
             ))}
           </SelectContent>
         </Select>
+      </div>
 
+      <div className="flex grow basis-24 flex-col gap-1">
+        <Label htmlFor="filter-priority" className="text-xs text-muted-foreground">
+          Priority
+        </Label>
         <Select
           value={filterPriority}
           onValueChange={(v) => onFilterPriorityChange(v as Priority | "all")}
         >
-          <SelectTrigger className="w-auto">
+          <SelectTrigger id="filter-priority" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All priorities</SelectItem>
+            <SelectItem value="all">All</SelectItem>
             <SelectItem value="high">High</SelectItem>
             <SelectItem value="medium">Medium</SelectItem>
             <SelectItem value="low">Low</SelectItem>
